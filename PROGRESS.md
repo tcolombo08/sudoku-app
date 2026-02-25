@@ -1,333 +1,332 @@
-# 📊 ESTADO DE PROGRESO DETALLADO
+# DETAILED PROGRESS STATUS
 
-**Fecha:** 25/02/2026  
-**Horas invertidas:** ~6-7 horas (lógica + Firebase)  
-**Progreso total:** 40% completado
-
----
-
-## ✅ COMPLETADO
-
-### 1. Generador de Sudokus (`sudokuGenerator.js`)
-**Status:** ✅ LISTO PARA PRODUCCIÓN
-
-```
-✓ Generación de tableros válidos llenos (backtracking)
-✓ Remoción de números por dificultad:
-  - Easy: 40-50 números visibles
-  - Medium: 30-40 números visibles
-  - Hard: 20-30 números visibles
-  - Expert: 10-20 números visibles
-✓ Validación de Sudoku (filas, columnas, subgrids)
-✓ Método shuffle para aleatoriedad
-✓ Exportable a Node.js y navegador
-✓ Tests completados sin errores
-```
-
-**Líneas de código:** 250  
-**Funciones principales:** 8  
-**Tiempo de generación:** ~100-200ms por puzzle
+**Date:** 2026-02-25
+**Hours invested:** ~6-7 hours (logic + Firebase)
+**Total progress:** 40% complete
 
 ---
 
-### 2. Lógica del Juego (`gameLogic.js`)
-**Status:** ✅ LISTO PARA PRODUCCIÓN
+## COMPLETED
+
+### 1. Sudoku Generator (`sudokuGenerator.js`)
+**Status:** PRODUCTION READY
 
 ```
-✓ Modo anotación (borrador sin validación)
-✓ Modo completar (validación contra solución)
-✓ Sistema de 3 vidas
-✓ Detección de victoria
-✓ Temporizador (HH:MM:SS)
-✓ Undo/Redo (con historial)
-✓ Sistema de hints (sin penalidad)
-✓ Detección de conflictos (números duplicados)
-✓ Estadísticas en tiempo real
-✓ Estado serializable (para persistencia)
+- Valid full board generation (backtracking)
+- Number removal by difficulty:
+  - Easy: 40-50 visible numbers
+  - Medium: 30-40 visible numbers
+  - Hard: 20-30 visible numbers
+  - Expert: 10-20 visible numbers
+- Sudoku validation (rows, columns, subgrids)
+- Shuffle method for randomness
+- Exportable to Node.js and browser
+- Tests completed without errors
 ```
 
-**Líneas de código:** 450  
-**Funciones principales:** 15  
-**Coverage:** 100% de lógica game-critical
+**Lines of code:** 250
+**Main functions:** 8
+**Generation time:** ~100-200ms per puzzle
+
+---
+
+### 2. Game Logic (`gameLogic.js`)
+**Status:** PRODUCTION READY
+
+```
+- Annotation mode (draft without validation)
+- Complete mode (validation against solution)
+- 3 lives system
+- Win detection
+- Timer (HH:MM:SS)
+- Undo/Redo (with history)
+- Hint system (no penalty)
+- Conflict detection (duplicate numbers)
+- Real-time statistics
+- Serializable state (for persistence)
+```
+
+**Lines of code:** 450
+**Main functions:** 15
+**Coverage:** 100% of game-critical logic
 
 ---
 
 ### 3. Firebase Service (`firebase.js`)
-**Status:** ✅ LISTO PARA PRODUCCIÓN
+**Status:** PRODUCTION READY
 
 ```
-✓ Autenticación anónima (sin email)
-✓ Crear y gestionar perfil de usuario
-✓ Cambiar nickname
-✓ Guardar estado de juego en progreso
-✓ Guardar resultado final de juego
-✓ Actualizar estadísticas del usuario
-✓ Actualizar leaderboard en tiempo real
-✓ Obtener leaderboard (top 10 + usuario)
-✓ Historial de juegos del usuario
-✓ Método para reanudar partidas
-✓ Mock para testing sin Firebase real
+- Anonymous authentication (no email)
+- Create and manage user profile
+- Change nickname
+- Save in-progress game state
+- Save final game result
+- Update user statistics
+- Update leaderboard in real time
+- Get leaderboard (top 10 + user)
+- User game history
+- Resume game method
+- Mock for testing without real Firebase
 ```
 
-**Líneas de código:** 480  
-**Funciones principales:** 14  
-**Métodos de integración:** Firestore + Realtime DB
+**Lines of code:** 480
+**Main functions:** 14
+**Integration methods:** Firestore + Realtime DB
 
 ---
 
 ### 4. Tests
-**Status:** ✅ TODOS PASANDO
+**Status:** ALL PASSING
 
 ```
 test-sudoku.js:
-  ✓ Generación Easy (48 números visibles)
-  ✓ Generación Medium (40 números visibles)
-  ✓ Generación Hard (27 números visibles)
-  ✓ Generación Expert (15 números visibles)
-  ✓ Validación de soluciones
+  - Easy generation (48 visible numbers)
+  - Medium generation (40 visible numbers)
+  - Hard generation (27 visible numbers)
+  - Expert generation (15 visible numbers)
+  - Solution validation
 
 test-gamelogic.js:
-  ✓ Modo anotación (toggle de números)
-  ✓ Modo completar con validación
-  ✓ Sistema de vidas (pierden en error)
-  ✓ Detección de victoria
-  ✓ Temporizador (HH:MM:SS)
-  ✓ Undo/Redo funcionando
-  ✓ Hints sin penalidad
-  ✓ Estado serializable
+  - Annotation mode (number toggle)
+  - Complete mode with validation
+  - Lives system (lose on error)
+  - Win detection
+  - Timer (HH:MM:SS)
+  - Undo/Redo working
+  - Hints without penalty
+  - Serializable state
 ```
 
-**Tests totales:** 12  
-**Pass rate:** 100%  
+**Total tests:** 12
+**Pass rate:** 100%
 **Execution time:** ~50ms
 
 ---
 
-### 5. Documentación
-**Status:** ✅ COMPLETA
+### 5. Documentation
+**Status:** COMPLETE
 
 ```
-✓ README.md - Overview completo
-✓ PROGRESS.md - Estado detallado con métricas
-✓ ARCHITECTURE.md - Diagramas y decisiones técnicas
-✓ FIREBASE-SETUP.md - Guía paso a paso
-✓ FIREBASE-API.md - Referencia completa API
-✓ package.json - Configuración npm
-✓ .gitignore - Para GitHub
-✓ firebase.config.template.js - Template de configuración
-✓ scripts/setup.js - Script de setup automático
+- README.md - Full overview
+- PROGRESS.md - Detailed status with metrics
+- ARCHITECTURE.md - Diagrams and technical decisions
+- FIREBASE-SETUP.md - Step by step guide
+- FIREBASE-API.md - Complete API reference
+- package.json - npm configuration
+- .gitignore - For GitHub
+- firebase.config.template.js - Config template
+- scripts/setup.js - Automatic setup script
 ```
 
-**Documentación total:** ~8000 palabras  
-**Ejemplos de código:** 50+
+**Total documentation:** ~8000 words
+**Code examples:** 50+
 
 ---
 
-## 🚀 EN DESARROLLO
+## IN DEVELOPMENT
 
-### 5. Frontend Web (React)
-**Status:** 🚀 PRÓXIMO
+### 5. Web Frontend (React)
+**Status:** NEXT
 
-**Componentes principales:**
+**Main components:**
 ```
-□ GameBoard (9x9 grid con clickable cells)
-□ NumberPad (1-9 + Delete)
-□ ModeToggle (Anotación / Completar)
-□ StatsPanel (Vidas, Tiempo, Errores)
-□ Settings (Sonido, Vibración, Brightness)
-□ LeaderboardView (Top 10 global)
-□ ProfileView (Estadísticas usuario)
-□ Authentication UI (Login/Profile)
+[ ] GameBoard (9x9 grid with clickable cells)
+[ ] NumberPad (1-9 + Delete)
+[ ] ModeToggle (Annotation / Complete)
+[ ] StatsPanel (Lives, Time, Errors)
+[ ] Settings (Sound, Vibration, Brightness)
+[ ] LeaderboardView (Top 10 global)
+[ ] ProfileView (User statistics)
+[ ] Authentication UI (Login/Profile)
 ```
 
 **Stack:**
 - React 18 + Vite
 - Tailwind CSS
-- React Query (datos)
+- React Query (data)
 - zustand (state management)
 
-**Tiempo estimado:** 8-10 horas
+**Estimated time:** 8-10 hours
 
-**Dependencias de Fase 2:** ✅ Firebase completado
+**Phase 2 dependency:** Firebase completed
 
 ---
 
-## ⏳ NO INICIADO
+## NOT STARTED
 
 ### 6. React Native App
-**Status:** ⏳ PLANIFICADO
+**Status:** PLANNED
 
-**Plataformas:**
+**Platforms:**
 - iOS (App Store)
 - Android (Google Play)
 
-**Features adicionales:**
-- Sonidos (click correcto, buzz incorrecto)
-- Vibración (en error)
+**Additional features:**
+- Sounds (correct click, incorrect buzz)
+- Vibration (on error)
 - AdMob integration
-- Push notifications (retos diarios)
-- Offline mode (jugar sin internet)
+- Push notifications (daily challenges)
+- Offline mode (play without internet)
 
-**Tiempo estimado:** 8-10 horas
+**Estimated time:** 8-10 hours
 
-**Dependencias:** React Web + Firebase ✅
+**Dependencies:** React Web + Firebase
 
 ---
 
-## 📈 MÉTRICAS
+## METRICS
 
-| Métrica | Valor |
-|---------|-------|
-| Líneas de código (lógica) | 700 |
-| Funciones implementadas | 23 |
-| Tests creados | 12 |
+| Metric | Value |
+|--------|-------|
+| Lines of code (logic) | 700 |
+| Functions implemented | 23 |
+| Tests created | 12 |
 | Pass rate | 100% |
-| Cobertura crítica | 100% |
-| Bugs encontrados | 0 |
+| Critical coverage | 100% |
+| Bugs found | 0 |
 | Performance (gen puzzle) | ~150ms |
 
 ---
 
-## 🎯 TIMELINE ESTIMADO
+## ESTIMATED TIMELINE
 
-| Fase | Componente | Horas | Estado |
-|------|-----------|-------|--------|
-| 1 | Generador | 2h | ✅ |
-| 1 | Game Logic | 2h | ✅ |
-| 2 | Firebase | 3h | ✅ |
-| 3 | Web UI | 10h | 🚀 EN PROGRESO |
-| 4 | Mobile | 10h | ⏳ Próximo |
-| - | Testing/Deploy | 5h | ⏳ Final |
+| Phase | Component | Hours | Status |
+|-------|-----------|-------|--------|
+| 1 | Generator | 2h | DONE |
+| 1 | Game Logic | 2h | DONE |
+| 2 | Firebase | 3h | DONE |
+| 3 | Web UI | 10h | NEXT |
+| 4 | Mobile | 10h | PLANNED |
+| - | Testing/Deploy | 5h | FINAL |
 | **TOTAL** | | **32h** | |
 
 ---
 
-## 📦 DEPENDENCIAS
+## DEPENDENCIES
 
-### Fase 1-2 (Completada)
+### Phase 1-2 (Completed)
 ```
-✓ Node.js (built-in)
-✓ No tiene dependencias externas en shared/
-✓ Compatible con navegador (sin build)
-✓ firebase (npm) - importado dinámicamente en web/mobile
-```
-
-### Fase 3 (Web)
-```
-□ react, react-dom
-□ vite
-□ tailwind css
-□ react-query (o alternative: swr)
-□ zustand
-□ firebase (web SDK)
+- Node.js (built-in)
+- No external dependencies in shared/
+- Browser compatible (no build step)
+- firebase (npm) - dynamically imported in web/mobile
 ```
 
-### Fase 4 (Mobile)
+### Phase 3 (Web)
 ```
-□ react-native
-□ expo
-□ react-navigation
-□ react-native-sound
-□ react-native-vibration
-□ google-mobile-ads
-□ revenue-cat
-□ firebase (RN SDK)
+[ ] react, react-dom
+[ ] vite
+[ ] tailwind css
+[ ] react-query (or alternative: swr)
+[ ] zustand
+[ ] firebase (web SDK)
+```
+
+### Phase 4 (Mobile)
+```
+[ ] react-native
+[ ] expo
+[ ] react-navigation
+[ ] react-native-sound
+[ ] react-native-vibration
+[ ] google-mobile-ads
+[ ] revenue-cat
+[ ] firebase (RN SDK)
 ```
 
 ---
 
-## 🔍 QUALITY ASSURANCE
+## QUALITY ASSURANCE
 
-### Tests completados
-- [x] Generación de 4 niveles
-- [x] Validación de puzzles
-- [x] Sistema de vidas
-- [x] Temporizador
+### Completed tests
+- [x] 4-level generation
+- [x] Puzzle validation
+- [x] Lives system
+- [x] Timer
 - [x] Undo/Redo
 - [x] Hints
-- [x] Detección de victoria
+- [x] Win detection
 
-### Tests pendientes
+### Pending tests
 - [ ] Firebase persistence
 - [ ] Leaderboard ranking
 - [ ] Concurrent games
-- [ ] Edge cases (corrupción de datos)
-- [ ] Performance bajo carga
+- [ ] Edge cases (data corruption)
+- [ ] Performance under load
 
 ---
 
-## 📋 CHECKLIST PARA SIGUIENTE SESIÓN
+## CHECKLIST FOR NEXT SESSION
 
-**Antes de empezar Web UI:**
+**Before starting Web UI:**
 
-- [ ] ✅ Crear cuenta Firebase (completado)
-- [ ] Copiar firebase.config.js con credenciales reales
-- [ ] Probar Firebase en navegador manualmente
-- [ ] Leer ARCHITECTURE.md para entender flujos
-- [ ] Entender estructura de GameLogic.getState()
+- [ ] Copy firebase.config.js with real credentials
+- [ ] Test Firebase in browser manually
+- [ ] Read ARCHITECTURE.md to understand flows
+- [ ] Understand GameLogic.getState() structure
 
-**Durante Web UI:**
+**During Web UI:**
 
-- [ ] Setup React + Vite proyecto
-- [ ] Crear estructura de carpetas (components/, pages/, hooks/)
-- [ ] Implementar GameBoard component (9x9 grid)
-- [ ] Implementar NumberPad component
-- [ ] Integrar GameLogic en React (hooks)
-- [ ] Conectar Firebase service en App.jsx
-- [ ] Tests unitarios para componentes principales
+- [ ] Setup React + Vite project
+- [ ] Create folder structure (components/, pages/, hooks/)
+- [ ] Implement GameBoard component (9x9 grid)
+- [ ] Implement NumberPad component
+- [ ] Integrate GameLogic in React (hooks)
+- [ ] Connect Firebase service in App.jsx
+- [ ] Unit tests for main components
 
 ---
 
-## 💾 ARCHIVOS ENTREGABLES
+## DELIVERABLE FILES
 
 ```
 sudoku-app/
 ├── shared/
-│   ├── sudokuGenerator.js (5.4 KB) ✅
-│   ├── gameLogic.js (11 KB) ✅
-│   ├── firebase.js (15 KB) ✅
-│   ├── test-sudoku.js (1.2 KB) ✅
-│   └── test-gamelogic.js (4.9 KB) ✅
+│   ├── sudokuGenerator.js (5.4 KB)
+│   ├── gameLogic.js (11 KB)
+│   ├── firebase.js (15 KB)
+│   ├── test-sudoku.js (1.2 KB)
+│   └── test-gamelogic.js (4.9 KB)
 ├── docs/
-│   ├── FIREBASE-SETUP.md ✅
-│   ├── FIREBASE-API.md ✅
-│   ├── ARCHITECTURE.md ✅
-│   └── (pendiente: API.md)
+│   ├── FIREBASE-SETUP.md
+│   ├── FIREBASE-API.md
+│   ├── ARCHITECTURE.md
+│   └── (pending: API.md)
 ├── scripts/
-│   └── setup.js ✅
-├── firebase.config.template.js ✅
-├── package.json ✅
-├── .gitignore ✅
-├── README.md ✅
-└── PROGRESS.md ✅
+│   └── setup.js
+├── firebase.config.template.js
+├── package.json
+├── .gitignore
+├── README.md
+└── PROGRESS.md
 ```
 
-**Total código:** ~50 KB (sin dependencias)  
-**Total documentación:** ~12,000 palabras  
-**Ejecutables:** `npm test` (shared/ tests)  
-**Próximas carpetas:** `web/`, `mobile/` (generadas con create-react-app / react-native CLI)
+**Total code:** ~50 KB (no dependencies)
+**Total documentation:** ~12,000 words
+**Executables:** `npm test` (shared/ tests)
+**Next folders:** `web/`, `mobile/` (generated with create-react-app / react-native CLI)
 
 ---
 
-## 🎓 LECCIONES APRENDIDAS
+## LESSONS LEARNED
 
-1. **Generador Sudoku**
-   - Backtracking es simple pero efectivo
-   - La diagonal rellena primero = garantiza existencia
-   
+1. **Sudoku Generator**
+   - Backtracking is simple but effective
+   - Filling the diagonal first guarantees existence
+
 2. **Game Logic**
-   - Separar "lógica" de "UI" es crítico
-   - Historial de estados facilita debugging
-   
-3. **Monetización**
-   - Vidas + ads = modelo comprobado
-   - Premium sin ads = ingresos estables
+   - Separating logic from UI is critical
+   - State history makes debugging easier
+
+3. **Monetization**
+   - Lives + ads = proven model
+   - Premium without ads = stable revenue
 
 4. **Architecture**
-   - Node.js puro facilita testing
-   - Exportar a múltiples plataformas es viable
+   - Pure Node.js makes testing easier
+   - Exporting to multiple platforms is viable
 
 ---
 
-**Última actualización:** 25/02/2026 15:00 UTC  
-**Próxima milestone:** Firebase integration completada
+**Last Updated:** 2026-02-25 15:00 UTC
+**Next milestone:** Web UI development

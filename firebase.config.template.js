@@ -1,12 +1,12 @@
 /**
  * Firebase Configuration Template
- * 
- * INSTRUCCIONES:
- * 1. Ve a https://firebase.google.com y crea un nuevo proyecto
- * 2. En Project Settings, copia tu configuración
- * 3. Reemplaza los valores de abajo
- * 4. Renombra este archivo a `firebase.config.js`
- * 5. Asegúrate de que está en .gitignore para NO subir a GitHub
+ *
+ * INSTRUCTIONS:
+ * 1. Go to https://firebase.google.com and create a new project
+ * 2. In Project Settings, copy your configuration
+ * 3. Replace the values below
+ * 4. Rename this file to `firebase.config.js`
+ * 5. Make sure it is listed in .gitignore to NOT push to GitHub
  */
 
 export const firebaseConfig = {
@@ -19,33 +19,33 @@ export const firebaseConfig = {
 };
 
 /**
- * Firestore Rules (copiar en Firebase Console > Firestore > Rules):
- * 
+ * Firestore Rules (copy in Firebase Console > Firestore > Rules):
+ *
  * rules_version = '2';
  * service cloud.firestore {
  *   match /databases/{database}/documents {
- *     // Usuarios solo pueden leer/escribir su propio perfil
+ *     // Users can only read/write their own profile
  *     match /users/{userId} {
  *       allow read, write: if request.auth.uid == userId;
  *     }
- * 
- *     // Juegos: solo el propietario puede leer/escribir
+ *
+ *     // Games: only the owner can read/write
  *     match /games/{gameId} {
  *       allow read, write: if request.auth.uid == resource.data.userId;
  *     }
- * 
- *     // Leaderboards: públicos para lectura, privados para escritura
+ *
+ *     // Leaderboards: public read, private write
  *     match /leaderboards/{difficulty}/{userId} {
  *       allow read: if true;
- *       allow write: if false; // Solo server-side updates
+ *       allow write: if false; // Server-side updates only
  *     }
  *   }
  * }
  */
 
 /**
- * Realtime Database Rules (copiar en Firebase Console > Realtime Database > Rules):
- * 
+ * Realtime Database Rules (copy in Firebase Console > Realtime Database > Rules):
+ *
  * {
  *   "rules": {
  *     "games_progress": {

@@ -1,46 +1,46 @@
 /**
- * Test de GameLogic
- * Ejecutar con: node test-gamelogic.js
+ * GameLogic test
+ * Run with: node test-gamelogic.js
  */
 
-const SudokuGenerator = require('./sudokuGenerator.js');
-const GameLogic = require('./gameLogic.js');
+import SudokuGenerator from './sudokuGenerator.js';
+import GameLogic from './gameLogic.js';
 
 console.log('='.repeat(60));
-console.log('GAME LOGIC - TEST COMPLETO');
+console.log('GAME LOGIC - FULL TEST');
 console.log('='.repeat(60));
 
-// Generar un Sudoku fácil para test
+// Generate an easy Sudoku for testing
 const generator = new SudokuGenerator();
 const game_data = generator.generate('easy');
 
-// Crear instancia del juego
+// Create game instance
 const game = new GameLogic(game_data.puzzle, game_data.solution);
 
-console.log('\n📋 PUZZLE INICIAL');
+console.log('\nINITIAL PUZZLE');
 console.log(game.boardToString());
 
-console.log('\n\n🎮 TEST 1: MODO ANOTACIÓN');
+console.log('\n\nTEST 1: ANNOTATION MODE');
 console.log('-'.repeat(60));
 
 game.setMode('annotation');
 
-// Agregar anotaciones a una celda
+// Add annotations to a cell
 let result = game.placeNumber(0, 0, 1);
-console.log(`Anotación [0,0] = 1: ${result.success ? '✓' : '✗'}`);
+console.log(`Annotation [0,0] = 1: ${result.success ? 'ok' : 'fail'}`);
 
 result = game.placeNumber(0, 0, 2);
-console.log(`Anotación [0,0] = 2: ${result.success ? '✓' : '✗'}`);
+console.log(`Annotation [0,0] = 2: ${result.success ? 'ok' : 'fail'}`);
 
 result = game.placeNumber(0, 0, 1); // toggle
-console.log(`Anotación [0,0] remover 1: ${result.success ? '✓' : '✗'}`);
+console.log(`Annotation [0,0] remove 1: ${result.success ? 'ok' : 'fail'}`);
 
-console.log(`\nNotas en [0,0]: ${game.notes[0][0].join(', ')}`);
+console.log(`\nNotes at [0,0]: ${game.notes[0][0].join(', ')}`);
 
-console.log('\n\n🎮 TEST 2: DETECCIÓN DE CONFLICTOS');
+console.log('\n\nTEST 2: CONFLICT DETECTION');
 console.log('-'.repeat(60));
 
-// Obtener la primera celda vacía y la solución
+// Get the first empty cell and the solution
 let emptyCell = null;
 for (let r = 0; r < 9; r++) {
   for (let c = 0; c < 9; c++) {
@@ -56,99 +56,99 @@ if (emptyCell) {
   const correctNum = game_data.solution[emptyCell.r][emptyCell.c];
   const wrongNum = correctNum === 1 ? 2 : 1;
 
-  console.log(`Celda vacía encontrada en [${emptyCell.r},${emptyCell.c}]`);
-  console.log(`Respuesta correcta: ${correctNum}`);
+  console.log(`Empty cell found at [${emptyCell.r},${emptyCell.c}]`);
+  console.log(`Correct answer: ${correctNum}`);
 
-  // Poner el número correcto en modo annotation primero
+  // Place correct number in annotation mode first
   game.setMode('annotation');
   game.placeNumber(emptyCell.r, emptyCell.c, correctNum);
 
-  // Cambiar a modo completar y poner el número incorrecto en otra celda
+  // Switch to complete mode and place wrong number in another cell
   game.setMode('complete');
 
-  // Encontrar otra celda vacía
+  // Find another empty cell
   for (let r = 0; r < 9; r++) {
     for (let c = 0; c < 9; c++) {
       if (r !== emptyCell.r && c !== emptyCell.c && game_data.puzzle[r][c] === 0 && game.board[r][c] === 0) {
-        console.log(`\nIntentando colocar número incorrecto en [${r},${c}]...`);
+        console.log(`\nPlacing wrong number at [${r},${c}]...`);
         result = game.placeNumber(r, c, wrongNum);
-        console.log(`Resultado: ${result.message}`);
-        console.log(`Vidas restantes: ${game.lives}`);
+        console.log(`Result: ${result.message}`);
+        console.log(`Lives remaining: ${game.lives}`);
         break;
       }
     }
   }
 }
 
-console.log('\n\n🎮 TEST 3: VIDAS Y ERRORES');
+console.log('\n\nTEST 3: LIVES AND ERRORS');
 console.log('-'.repeat(60));
 
-console.log(`Vidas iniciales: ${game.maxLives}`);
-console.log(`Vidas actuales: ${game.lives}`);
-console.log(`Errores cometidos: ${game.stats.mistakesMade}`);
+console.log(`Initial lives: ${game.maxLives}`);
+console.log(`Current lives: ${game.lives}`);
+console.log(`Mistakes made: ${game.stats.mistakesMade}`);
 
 result = game.restoreLife();
-console.log(`\nRestaurar vida: ${result.message}`);
-console.log(`Vidas después: ${game.lives}`);
+console.log(`\nRestore life: ${result.message}`);
+console.log(`Lives after: ${game.lives}`);
 
-console.log('\n\n⏱️ TEST 4: TEMPORIZADOR');
+console.log('\n\nTEST 4: TIMER');
 console.log('-'.repeat(60));
 
 const time1 = game.updateTimer();
-console.log(`Tiempo actual: ${time1}`);
-console.log(`Segundos totales: ${game.elapsedSeconds}s`);
+console.log(`Current time: ${time1}`);
+console.log(`Total seconds: ${game.elapsedSeconds}s`);
 
-// Simular que pasó tiempo
+// Simulate time passing
 game.startTime = Date.now() - 125000; // 2:05 ago
 const time2 = game.updateTimer();
-console.log(`Después de simular 2:05: ${time2}`);
+console.log(`After simulating 2:05: ${time2}`);
 
-console.log('\n\n↩️ TEST 5: UNDO/REDO');
+console.log('\n\nTEST 5: UNDO/REDO');
 console.log('-'.repeat(60));
 
 game.setMode('annotation');
 game.placeNumber(1, 1, 5);
-console.log(`Estado 1: Anotación [1,1] = 5`);
+console.log(`State 1: Annotation [1,1] = 5`);
 
 game.placeNumber(2, 2, 7);
-console.log(`Estado 2: Anotación [2,2] = 7`);
+console.log(`State 2: Annotation [2,2] = 7`);
 
-console.log(`Notas [1,1]: ${game.notes[1][1].join(', ')}`);
-console.log(`Notas [2,2]: ${game.notes[2][2].join(', ')}`);
+console.log(`Notes [1,1]: ${game.notes[1][1].join(', ')}`);
+console.log(`Notes [2,2]: ${game.notes[2][2].join(', ')}`);
 
 result = game.undo();
 console.log(`\nUNDO: ${result.message}`);
-console.log(`Notas [1,1] después undo: ${game.notes[1][1].join(', ')}`);
-console.log(`Notas [2,2] después undo: ${game.notes[2][2].join(', ')}`);
+console.log(`Notes [1,1] after undo: ${game.notes[1][1].join(', ')}`);
+console.log(`Notes [2,2] after undo: ${game.notes[2][2].join(', ')}`);
 
 result = game.redo();
 console.log(`\nREDO: ${result.message}`);
-console.log(`Notas [2,2] después redo: ${game.notes[2][2].join(', ')}`);
+console.log(`Notes [2,2] after redo: ${game.notes[2][2].join(', ')}`);
 
-console.log('\n\n📊 TEST 6: ESTADO DEL JUEGO');
+console.log('\n\nTEST 6: GAME STATE');
 console.log('-'.repeat(60));
 
 const state = game.getState();
-console.log(`Modo actual: ${state.mode}`);
-console.log(`Vidas: ${state.lives}/${state.maxLives}`);
-console.log(`Tiempo: ${game.formatTime(state.elapsedSeconds)}`);
+console.log(`Current mode: ${state.mode}`);
+console.log(`Lives: ${state.lives}/${state.maxLives}`);
+console.log(`Time: ${game.formatTime(state.elapsedSeconds)}`);
 console.log(`Game Over: ${state.isGameOver}`);
-console.log(`Victoria: ${state.isWon}`);
-console.log(`Movimientos totales: ${state.stats.movementsTotal}`);
-console.log(`Errores: ${state.stats.mistakesMade}`);
-console.log(`Hints usados: ${state.stats.hintsUsed}`);
+console.log(`Won: ${state.isWon}`);
+console.log(`Total moves: ${state.stats.movementsTotal}`);
+console.log(`Mistakes: ${state.stats.mistakesMade}`);
+console.log(`Hints used: ${state.stats.hintsUsed}`);
 
-console.log('\n\n💡 TEST 7: HINTS');
+console.log('\n\nTEST 7: HINTS');
 console.log('-'.repeat(60));
 
 if (emptyCell) {
   result = game.getHint(emptyCell.r, emptyCell.c);
   if (result.success) {
-    console.log(`Hint para [${emptyCell.r},${emptyCell.c}]: ${result.hint}`);
-    console.log(`Hints usados: ${game.stats.hintsUsed}`);
+    console.log(`Hint for [${emptyCell.r},${emptyCell.c}]: ${result.hint}`);
+    console.log(`Hints used: ${game.stats.hintsUsed}`);
   }
 }
 
 console.log('\n' + '='.repeat(60));
-console.log('✅ TODOS LOS TESTS COMPLETADOS');
+console.log('ALL TESTS COMPLETED');
 console.log('='.repeat(60));

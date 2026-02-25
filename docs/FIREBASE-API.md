@@ -1,6 +1,6 @@
-# 📚 Firebase Service API
+# Firebase Service API
 
-## Inicialización
+## Initialization
 
 ```javascript
 import FirebaseService from './firebase.js';
@@ -14,10 +14,10 @@ await firebase.initialize();
 
 ## API Reference
 
-### Autenticación
+### Authentication
 
 #### `initialize()`
-Inicializa Firebase (llamar una sola vez).
+Initializes Firebase (call only once).
 
 ```javascript
 const success = await firebase.initialize();
@@ -25,7 +25,7 @@ const success = await firebase.initialize();
 ```
 
 #### `getAuthState()`
-Obtiene el estado actual de autenticación.
+Gets the current authentication state.
 
 ```javascript
 const state = firebase.getAuthState();
@@ -38,10 +38,10 @@ const state = firebase.getAuthState();
 
 ---
 
-### Perfil de Usuario
+### User Profile
 
 #### `createUserProfile(nickname)`
-Crea perfil con nickname aleatorio.
+Creates a profile with a random nickname.
 
 ```javascript
 const success = await firebase.createUserProfile('MyPlayer');
@@ -49,7 +49,7 @@ const success = await firebase.createUserProfile('MyPlayer');
 ```
 
 #### `getUserProfile()`
-Obtiene el perfil actual del usuario.
+Gets the current user profile.
 
 ```javascript
 const profile = await firebase.getUserProfile();
@@ -75,7 +75,7 @@ const profile = await firebase.getUserProfile();
 ```
 
 #### `updateNickname(newNickname)`
-Cambia el nickname del usuario.
+Changes the user's nickname.
 
 ```javascript
 const result = await firebase.updateNickname('NewName');
@@ -87,28 +87,28 @@ const result = await firebase.updateNickname('NewName');
 
 ---
 
-### Juegos en Progreso
+### In-Progress Games
 
 #### `saveGameState(gameId, gameState)`
-Guarda el estado actual del juego (se puede reanudar).
+Saves the current game state (can be resumed).
 
 ```javascript
 const gameState = {
-  mode: 'medium',           // dificultad
-  board: [...],             // tablero actual
-  notes: [...],             // anotaciones
-  lives: 2,                 // vidas restantes
-  elapsedSeconds: 342       // segundos jugados
+  mode: 'medium',           // difficulty
+  board: [...],             // current board
+  notes: [...],             // annotations
+  lives: 2,                 // remaining lives
+  elapsedSeconds: 342       // seconds played
 };
 
 const success = await firebase.saveGameState('game_123', gameState);
 // Returns: boolean
 ```
 
-**Nota:** Se guarda en Realtime Database para sync rápido.
+**Note:** Saved in Realtime Database for fast sync.
 
 #### `getGameState(gameId)`
-Obtiene una partida en progreso para reanudar.
+Gets an in-progress game to resume.
 
 ```javascript
 const state = await firebase.getGameState('game_123');
@@ -125,7 +125,7 @@ const state = await firebase.getGameState('game_123');
 ```
 
 #### `deleteGameState(gameId)`
-Elimina una partida en progreso.
+Deletes an in-progress game.
 
 ```javascript
 const success = await firebase.deleteGameState('game_123');
@@ -134,20 +134,20 @@ const success = await firebase.deleteGameState('game_123');
 
 ---
 
-### Resultados de Juegos
+### Game Results
 
 #### `saveGameResult(result)`
-Guarda el resultado final de un juego completado.
+Saves the final result of a completed game.
 
 ```javascript
 const result = {
-  gameId: 'game_123',       // ID único de la partida
+  gameId: 'game_123',       // Unique game ID
   difficulty: 'medium',     // easy, medium, hard, expert
-  won: true,                // ¿ganó?
-  time: 245,                // segundos
-  mistakes: 1,              // errores cometidos
-  hints: 0,                 // hints usados
-  totalMoves: 81            // movimientos totales
+  won: true,                // Did the player win?
+  time: 245,                // seconds
+  mistakes: 1,              // mistakes made
+  hints: 0,                 // hints used
+  totalMoves: 81            // total moves
 };
 
 const response = await firebase.saveGameResult(result);
@@ -158,13 +158,13 @@ const response = await firebase.saveGameResult(result);
 // }
 ```
 
-**Efectos secundarios:**
-- Actualiza estadísticas del usuario
-- Actualiza leaderboard si ganó
-- Elimina partida en progreso
+**Side effects:**
+- Updates user statistics
+- Updates leaderboard if won
+- Deletes in-progress game
 
 #### `getUserGames(limit = 10)`
-Obtiene el historial de juegos del usuario.
+Gets the user's game history.
 
 ```javascript
 const games = await firebase.getUserGames(20);
@@ -189,7 +189,7 @@ const games = await firebase.getUserGames(20);
 ### Leaderboard
 
 #### `getLeaderboard(difficulty)`
-Obtiene top 10 + posición del usuario.
+Gets top 10 + user's position.
 
 ```javascript
 const leaderboard = await firebase.getLeaderboard('medium');
@@ -218,7 +218,7 @@ const leaderboard = await firebase.getLeaderboard('medium');
 ```
 
 #### `getLeaderboardEntry(difficulty)`
-Obtiene solo la entrada del usuario en un leaderboard.
+Gets only the user's entry in a leaderboard.
 
 ```javascript
 const entry = await firebase.getLeaderboardEntry('hard');
@@ -233,26 +233,26 @@ const entry = await firebase.getLeaderboardEntry('hard');
 
 ---
 
-### Utilidades
+### Utilities
 
 #### `generateGameId()`
-Genera un ID único para una partida.
+Generates a unique game ID.
 
 ```javascript
 const gameId = firebase.generateGameId();
-// Returns: string (ej: "game_1708876543_abc123def")
+// Returns: string (e.g.: "game_1708876543_abc123def")
 ```
 
 #### `initializeMock()`
-Para testing sin credenciales reales.
+For testing without real credentials.
 
 ```javascript
 firebase.initializeMock();
-// Simula autenticación, no usa Firebase real
+// Simulates authentication, does not use real Firebase
 ```
 
 #### `mockSaveResult(difficulty, won, time)`
-Para testing, simula guardar un resultado.
+For testing, simulates saving a result.
 
 ```javascript
 const result = await firebase.mockSaveResult('easy', true, 245);
@@ -266,20 +266,20 @@ const result = await firebase.mockSaveResult('easy', true, 245);
 
 ---
 
-## Flujo típico de uso
+## Typical Usage Flow
 
-### 1. Iniciar app
+### 1. Start app
 
 ```javascript
 const firebase = new FirebaseService(firebaseConfig);
 await firebase.initialize();
 
-// El usuario ya está autenticado anónimamente
+// User is already anonymously authenticated
 const state = firebase.getAuthState();
 // { isAuthenticated: true, userId: "...", nickname: "Player_ABC" }
 ```
 
-### 2. Generar nuevo juego
+### 2. Generate new game
 
 ```javascript
 import SudokuGenerator from './sudokuGenerator.js';
@@ -290,27 +290,27 @@ const gameData = generator.generate('medium');
 const game = new GameLogic(gameData.puzzle, gameData.solution);
 
 const gameId = firebase.generateGameId();
-// Guarda estado inicial
+// Save initial state
 await firebase.saveGameState(gameId, game.getState());
 ```
 
-### 3. Jugar
+### 3. Play
 
 ```javascript
-// Mientras juega, guardar cada movimiento
+// While playing, save each move
 const result = game.placeNumber(0, 0, 5);
 
-// Guardar en Firebase cada 10 segundos (para poder reanudar)
+// Save to Firebase every 10 seconds (to allow resuming)
 if (moveCount % 10 === 0) {
   await firebase.saveGameState(gameId, game.getState());
 }
 ```
 
-### 4. Victoria o derrota
+### 4. Win or lose
 
 ```javascript
 if (game.isWon) {
-  // Guardar resultado final
+  // Save final result
   const result = await firebase.saveGameResult({
     gameId,
     difficulty: 'medium',
@@ -320,13 +320,13 @@ if (game.isWon) {
     hints: game.stats.hintsUsed,
     totalMoves: game.stats.movementsTotal
   });
-  
-  // Mostrar leaderboard
+
+  // Show leaderboard
   const leaderboard = await firebase.getLeaderboard('medium');
 }
 
 if (game.lives === 0) {
-  // Guardar como derrota (no actualiza leaderboard)
+  // Save as loss (does not update leaderboard)
   await firebase.saveGameResult({
     gameId,
     difficulty: 'medium',
@@ -339,94 +339,94 @@ if (game.lives === 0) {
 }
 ```
 
-### 5. Reanudar partida
+### 5. Resume game
 
 ```javascript
 const savedState = await firebase.getGameState(gameId);
 
 if (savedState) {
-  // Reconstruir juego desde estado guardado
+  // Rebuild game from saved state
   const game = new GameLogic(puzzle, solution);
   game.board = savedState.board;
   game.notes = savedState.notes;
   game.lives = savedState.lives;
   game.elapsedSeconds = savedState.elapsedSeconds;
-  // ... continuar jugando
+  // ... continue playing
 }
 ```
 
-### 6. Ver estadísticas
+### 6. View statistics
 
 ```javascript
 const profile = await firebase.getUserProfile();
-console.log('Juegos ganados:', profile.stats.gamesWon);
-console.log('Mejor tiempo (medium):', profile.stats.bestTimes.medium);
+console.log('Games won:', profile.stats.gamesWon);
+console.log('Best time (medium):', profile.stats.bestTimes.medium);
 
 const games = await firebase.getUserGames(10);
-console.log('Últimos 10 juegos:', games);
+console.log('Last 10 games:', games);
 ```
 
 ---
 
 ## Error Handling
 
-Todos los métodos pueden fallar. Ejemplo seguro:
+All methods can fail. Safe example:
 
 ```javascript
 try {
   const result = await firebase.saveGameResult(gameResult);
-  
+
   if (result.success) {
-    console.log('Guardado correctamente');
+    console.log('Saved successfully');
   } else {
     console.error('Error:', result.error);
   }
 } catch (error) {
-  console.error('Error de Firebase:', error.message);
-  // Mostrar mensaje al usuario
+  console.error('Firebase error:', error.message);
+  // Show message to user
 }
 ```
 
 ---
 
-## Limits y consideraciones
+## Limits and Considerations
 
-| Recurso | Límite Gratis |
-|---------|---|
-| Firestore reads | 50,000/día |
-| Firestore writes | 20,000/día |
-| Firestore deletes | 20,000/día |
+| Resource | Free Limit |
+|----------|------------|
+| Firestore reads | 50,000/day |
+| Firestore writes | 20,000/day |
+| Firestore deletes | 20,000/day |
 | Realtime DB | 10GB total |
-| Auth (usuarios anónimos) | Sin límite |
+| Auth (anonymous users) | No limit |
 
-**Tips para optimizar:**
-- Guarda estado cada 10 segundos, no cada movimiento
-- Usa Realtime DB para estado (sync rápido)
-- Usa Firestore para resultados (queries)
-- Cachea leaderboard en cliente
+**Tips for optimization:**
+- Save state every 10 seconds, not every move
+- Use Realtime DB for state (fast sync)
+- Use Firestore for results (queries)
+- Cache leaderboard on the client
 
 ---
 
 ## Debugging
 
-### Ver logs de Firebase
+### View Firebase logs
 
 ```javascript
-// En navegador console:
+// In browser console:
 firebase.getAuthState()
-// Ver estado actual
+// See current state
 
 // Firestore queries
-// Firebase Console → Firestore → Ejecutar queries
+// Firebase Console -> Firestore -> Run queries
 ```
 
-### Simular offline mode (web)
+### Simulate offline mode (web)
 
 ```javascript
-// En DevTools → Network → Offline
-// La app debería guardar localmente y syncear cuando vuelva
+// In DevTools -> Network -> Offline
+// The app should save locally and sync when back online
 ```
 
 ---
 
-**Última actualización:** 25/02/2026
+**Last Updated:** 2026-02-25

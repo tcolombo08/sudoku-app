@@ -1,124 +1,124 @@
-# 🏗️ ARQUITECTURA TÉCNICA
+# TECHNICAL ARCHITECTURE
 
 ---
 
-## 📐 Diagrama de Flujo
+## Flow Diagram
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                     USUARIO (React Web / RN Mobile)          │
-└────────┬────────────────────────────────────────────────────┘
-         │
-         │ Event: "Tap celda [0,0]"
-         │ Payload: {row: 0, col: 0, num: 5}
-         ↓
-┌─────────────────────────────────────────────────────────────┐
-│                      GameLogic (JavaScript)                  │
-│                                                              │
-│  placeNumber(0, 0, 5)                                       │
-│    ├─ Validar coordenadas                                   │
-│    ├─ Verificar no es celda original                        │
-│    ├─ Si mode='annotation':                                 │
-│    │   └─ toggleAnnotation() → notas[0][0] = [5]           │
-│    ├─ Si mode='complete':                                   │
-│    │   └─ placeAndValidate() → 5 == solución[0][0]?       │
-│    │       ├─ Sí? ✓ board[0][0] = 5                        │
-│    │       ├─ No? ✗ lives--                                 │
-│    │       └─ isSolved()? → endGame()                       │
-│    └─ Guardar en historial                                  │
-│                                                              │
-│  Returns: {                                                  │
-│    success: true,                                            │
-│    isCorrect: true,                                          │
-│    isWon: false,                                             │
-│    livesRemaining: 3                                         │
-│  }                                                            │
-└────────┬────────────────────────────────────────────────────┘
-         │
-         │ Response
-         ↓
-┌─────────────────────────────────────────────────────────────┐
-│              Firebase (Firestore + Realtime DB)             │
-│                                                              │
-│  gameLogic.getState() → serializa estado                    │
-│  {                                                           │
-│    board, notes, lives, time, stats                         │
-│  }                                                           │
-│                                                              │
-│  firebase.saveGameState(gameId, state)                      │
-│    └─ db.collection('games').doc(gameId).update(state)     │
-│                                                              │
-│  Cuando gana:                                                │
-│  firebase.saveResult(userId, result)                        │
-│    └─ Actualiza leaderboard en tiempo real                  │
-└─────────────────────────────────────────────────────────────┘
++-------------------------------------------------------------+
+|                     USER (React Web / RN Mobile)             |
++--------+----------------------------------------------------+
+         |
+         | Event: "Tap cell [0,0]"
+         | Payload: {row: 0, col: 0, num: 5}
+         v
++-------------------------------------------------------------+
+|                      GameLogic (JavaScript)                  |
+|                                                              |
+|  placeNumber(0, 0, 5)                                       |
+|    +- Validate coordinates                                  |
+|    +- Check not an original cell                            |
+|    +- If mode='annotation':                                 |
+|    |   +- toggleAnnotation() -> notes[0][0] = [5]          |
+|    +- If mode='complete':                                   |
+|    |   +- placeAndValidate() -> 5 == solution[0][0]?       |
+|    |       +- Yes? board[0][0] = 5                          |
+|    |       +- No?  lives--                                  |
+|    |       +- isSolved()? -> endGame()                      |
+|    +- Save to history                                       |
+|                                                              |
+|  Returns: {                                                  |
+|    success: true,                                            |
+|    isCorrect: true,                                          |
+|    isWon: false,                                             |
+|    livesRemaining: 3                                         |
+|  }                                                           |
++--------+----------------------------------------------------+
+         |
+         | Response
+         v
++-------------------------------------------------------------+
+|              Firebase (Firestore + Realtime DB)              |
+|                                                              |
+|  gameLogic.getState() -> serializes state                   |
+|  {                                                           |
+|    board, notes, lives, time, stats                         |
+|  }                                                           |
+|                                                              |
+|  firebase.saveGameState(gameId, state)                      |
+|    +- db.collection('games').doc(gameId).update(state)      |
+|                                                              |
+|  On win:                                                     |
+|  firebase.saveResult(userId, result)                        |
+|    +- Updates leaderboard in real time                      |
++-------------------------------------------------------------+
 ```
 
 ---
 
-## 🧩 Componentes
+## Components
 
-### 1. SudokuGenerator (Generación)
+### 1. SudokuGenerator (Generation)
 
 ```javascript
 class SudokuGenerator
-  ├─ generateFullBoard()        → tablero 9x9 válido lleno
-  │  ├─ fillSubgrid()           → llena diagonales
-  │  └─ solveBoard()            → backtracking recursivo
-  ├─ generate(difficulty)       → puzzle + solution
-  │  └─ remover números según dificultad
-  ├─ isValid(row, col, num)    → validar número en posición
-  │  ├─ validar fila
-  │  ├─ validar columna
-  │  └─ validar subgrid 3x3
-  └─ shuffle()                 → Fisher-Yates aleatorio
+  +- generateFullBoard()        -> valid filled 9x9 board
+  |  +- fillSubgrid()           -> fills diagonals
+  |  +- solveBoard()            -> recursive backtracking
+  +- generate(difficulty)       -> puzzle + solution
+  |  +- remove numbers based on difficulty
+  +- isValid(row, col, num)    -> validate number at position
+  |  +- validate row
+  |  +- validate column
+  |  +- validate 3x3 subgrid
+  +- shuffle()                 -> Fisher-Yates random
 ```
 
-**Entrada:** `'easy'` | `'medium'` | `'hard'` | `'expert'`  
-**Salida:** `{puzzle: 2D[], solution: 2D[], difficulty: string}`
+**Input:** `'easy'` | `'medium'` | `'hard'` | `'expert'`
+**Output:** `{puzzle: 2D[], solution: 2D[], difficulty: string}`
 
 ---
 
-### 2. GameLogic (Juego en vivo)
+### 2. GameLogic (Live Game)
 
 ```javascript
 class GameLogic
-  ├─ Constructor(puzzle, solution)
-  │  └─ Inicializa board, notes, lives=3, timer
-  │
-  ├─ placeNumber(row, col, num)
-  │  ├─ [Validation]
-  │  ├─ [History save]
-  │  ├─ Si mode='annotation' → toggleAnnotation()
-  │  └─ Si mode='complete' → placeAndValidate()
-  │
-  ├─ placeAndValidate()        → valida contra solución
-  │  ├─ Si correcto: board[r][c] = num
-  │  ├─ Si incorrecto: lives--
-  │  └─ isSolved()? → endGame()
-  │
-  ├─ isSolved()                → ¿sudoku completo?
-  │  ├─ Todas las celdas llenas?
-  │  └─ ¿Coincide con solución?
-  │
-  ├─ updateTimer()             → HH:MM:SS
-  ├─ getHint(row, col)        → solución[r][c]
-  ├─ undo() / redo()          → navegación historial
-  ├─ hasConflict()            → números duplicados?
-  └─ getState() / getResult() → serializar para persistencia
+  +- Constructor(puzzle, solution)
+  |  +- Initializes board, notes, lives=3, timer
+  |
+  +- placeNumber(row, col, num)
+  |  +- [Validation]
+  |  +- [History save]
+  |  +- If mode='annotation' -> toggleAnnotation()
+  |  +- If mode='complete' -> placeAndValidate()
+  |
+  +- placeAndValidate()        -> validates against solution
+  |  +- If correct: board[r][c] = num
+  |  +- If incorrect: lives--
+  |  +- isSolved()? -> endGame()
+  |
+  +- isSolved()                -> is the sudoku complete?
+  |  +- All cells filled?
+  |  +- Matches solution?
+  |
+  +- updateTimer()             -> HH:MM:SS
+  +- getHint(row, col)        -> solution[r][c]
+  +- undo() / redo()          -> history navigation
+  +- hasConflict()            -> duplicate numbers?
+  +- getState() / getResult() -> serialize for persistence
 ```
 
-**Estados:**
-- `mode: 'annotation'` (borrador, sin validación)
-- `mode: 'complete'` (validación en cada número)
+**States:**
+- `mode: 'annotation'` (draft, no validation)
+- `mode: 'complete'` (validation on each number)
 
-**Salidas:**
+**Outputs:**
 ```javascript
 {
   success: true,
-  isCorrect: true,     // null si mode=annotation
-  isWon: false,        // true si completó puzzle
-  isGameOver: false,   // true si 0 vidas
+  isCorrect: true,     // null if mode=annotation
+  isWon: false,        // true if puzzle completed
+  isGameOver: false,   // true if 0 lives
   livesRemaining: 3,
   message: "string"
 }
@@ -130,27 +130,27 @@ class GameLogic
 
 ```javascript
 class FirebaseService
-  ├─ initAuth()
-  │  └─ signInAnonymously() → userId
-  │
-  ├─ createUser(nickname)
-  │  └─ users/{userId}/profile = {nickname, createdAt}
-  │
-  ├─ saveGameState(gameId, state)
-  │  └─ games/{gameId} = {userId, difficulty, board, notes, ...}
-  │
-  ├─ saveGameResult(result)
-  │  ├─ games/{gameId} = {won, time, mistakes, hints}
-  │  └─ updateLeaderboard(userId, difficulty, time)
-  │
-  ├─ getLeaderboard(difficulty, limit=10)
-  │  └─ Retorna top 10 + usuario si está fuera
-  │
-  ├─ getUserProfile()
-  │  └─ nickname, stats, bestTimes por dificultad
-  │
-  └─ updateNickname(newNickname)
-     └─ users/{userId}/profile/nickname
+  +- initAuth()
+  |  +- signInAnonymously() -> userId
+  |
+  +- createUser(nickname)
+  |  +- users/{userId}/profile = {nickname, createdAt}
+  |
+  +- saveGameState(gameId, state)
+  |  +- games/{gameId} = {userId, difficulty, board, notes, ...}
+  |
+  +- saveGameResult(result)
+  |  +- games/{gameId} = {won, time, mistakes, hints}
+  |  +- updateLeaderboard(userId, difficulty, time)
+  |
+  +- getLeaderboard(difficulty, limit=10)
+  |  +- Returns top 10 + user if outside top
+  |
+  +- getUserProfile()
+  |  +- nickname, stats, bestTimes per difficulty
+  |
+  +- updateNickname(newNickname)
+     +- users/{userId}/profile/nickname
 ```
 
 **Firestore Schema:**
@@ -182,7 +182,7 @@ games/
       mistakes: number,
       hints: number
     }
-    state?: {  // Partida en progreso
+    state?: {  // In-progress game
       board: number[][],
       notes: number[][][],
       lives: number,
@@ -200,107 +200,107 @@ leaderboards/
 
 ---
 
-## 🔄 Flujos Principales
+## Main Flows
 
-### Flujo 1: Iniciar nuevo juego
+### Flow 1: Start new game
 
 ```
-1. UI: Usuario toca "Nuevo Juego" + selecciona dificultad
-   ↓
+1. UI: User taps "New Game" + selects difficulty
+   v
 2. SudokuGenerator.generate(difficulty)
-   └─ Retorna: {puzzle, solution}
-   ↓
+   +- Returns: {puzzle, solution}
+   v
 3. GameLogic(puzzle, solution)
-   └─ Inicializa juego
-   ↓
+   +- Initializes game
+   v
 4. Firebase.saveGameState(gameId, initialState)
-   └─ Guarda estado inicial
-   ↓
-5. UI: Renderiza board + numberPad
+   +- Saves initial state
+   v
+5. UI: Renders board + numberPad
 ```
 
-### Flujo 2: Jugar (Completar modo)
+### Flow 2: Playing (Complete mode)
 
 ```
-1. Usuario: Toca celda [0,0], toca "5"
-   ↓
+1. User: Taps cell [0,0], taps "5"
+   v
 2. GameLogic.setMode('complete')
    GameLogic.placeNumber(0, 0, 5)
-   ↓
-3. Validación:
-   a) ¿5 == solución[0][0]? 
-   b) Si SÍ:
+   v
+3. Validation:
+   a) 5 == solution[0][0]?
+   b) If YES:
       - board[0][0] = 5
-      - Retorna {isCorrect: true}
-   c) Si NO:
+      - Returns {isCorrect: true}
+   c) If NO:
       - lives--
-      - Retorna {isCorrect: false, livesRemaining: 2}
-   ↓
-4. UI: Visualiza número (verde/rojo)
-   ↓
-5. ¿isSolved()? 
-   a) No → volver a paso 1
-   b) Sí → Flujo 3 (Victoria)
+      - Returns {isCorrect: false, livesRemaining: 2}
+   v
+4. UI: Displays number (green/red)
+   v
+5. isSolved()?
+   a) No -> back to step 1
+   b) Yes -> Flow 3 (Victory)
 ```
 
-### Flujo 3: Victoria
+### Flow 3: Victory
 
 ```
 1. GameLogic.isSolved() = true
-   ↓
+   v
 2. GameLogic.endGame(true)
-   └─ elapsedSeconds = final
-   ↓
+   +- elapsedSeconds = final
+   v
 3. GameLogic.getResult()
    {won: true, time: 245, mistakes: 2, hints: 0}
-   ↓
+   v
 4. Firebase.saveGameResult(result)
-   ├─ Crea documento en games/
-   └─ Actualiza leaderboard
-   ↓
-5. UI: Muestra panel de victoria
-   ├─ Tiempo: 4:05
-   ├─ Errores: 2
-   ├─ Ad corto (5s)
-   └─ Botón "Siguiente juego"
+   +- Creates document in games/
+   +- Updates leaderboard
+   v
+5. UI: Shows victory panel
+   +- Time: 4:05
+   +- Mistakes: 2
+   +- Short ad (5s)
+   +- "Next game" button
 ```
 
-### Flujo 4: Game Over (0 vidas)
+### Flow 4: Game Over (0 lives)
 
 ```
-1. lives = 1, usuario comete error
-   ↓
-2. GameLogic.placeNumber() → lives--
-   ↓
-3. lives = 0 → GameLogic.endGame(false)
-   ↓
+1. lives = 1, user makes a mistake
+   v
+2. GameLogic.placeNumber() -> lives--
+   v
+3. lives = 0 -> GameLogic.endGame(false)
+   v
 4. GameLogic.getResult()
    {won: false, ...}
-   ↓
+   v
 5. Firebase.saveGameResult(result)
-   ├─ Marca como pérdida
-   └─ NO actualiza leaderboard
-   ↓
-6. UI: Muestra panel de derrota
-   ├─ "Game Over"
-   ├─ Botón "Ver solución"
-   ├─ Ad largo (30s) → +1 vida?
-   └─ Botón "Reintentar"
+   +- Marks as loss
+   +- Does NOT update leaderboard
+   v
+6. UI: Shows defeat panel
+   +- "Game Over"
+   +- "View solution" button
+   +- Long ad (30s) -> +1 life?
+   +- "Retry" button
 ```
 
 ---
 
-## 💾 Persistencia
+## Persistence
 
-### Estado en progreso
-Se guarda **cada movimiento** en Firebase Realtime DB para reanudar:
+### In-progress state
+Saved **every move** in Firebase Realtime DB to resume:
 
 ```javascript
 gameState = {
   gameId: "game_123",
   userId: "user_456",
-  board: [...],      // números colocados
-  notes: [...],      // anotaciones
+  board: [...],      // placed numbers
+  notes: [...],      // annotations
   lives: 2,
   elapsedSeconds: 342,
   difficulty: "medium",
@@ -308,11 +308,11 @@ gameState = {
 }
 
 firebase.saveGameState(gameId, gameState)
-// Sobre-escribe en Realtime DB (rápido, eventual consistent)
+// Overwrites in Realtime DB (fast, eventually consistent)
 ```
 
-### Resultado final
-Se guarda **una sola vez** cuando termina:
+### Final result
+Saved **once** when the game ends:
 
 ```javascript
 gameResult = {
@@ -327,19 +327,19 @@ gameResult = {
 }
 
 firebase.saveGameResult(gameResult)
-// Escribe en Firestore (persistencia, para analytics)
+// Writes to Firestore (persistence, for analytics)
 ```
 
 ---
 
-## 📱 Adaptación a Plataformas
+## Platform Adaptation
 
 ### Web (React)
 ```javascript
 import GameLogic from '../shared/gameLogic.js'
 import SudokuGenerator from '../shared/sudokuGenerator.js'
 
-// Uso directo en React
+// Direct use in React
 const [gameState, setGameState] = useState(...)
 const game = useRef(new GameLogic(puzzle, solution))
 
@@ -357,7 +357,7 @@ import { Vibration } from 'react-native'
 
 const handleCellClick = (row, col, num) => {
   const result = game.current.placeNumber(row, col, num)
-  
+
   if (result.isCorrect === true) {
     Sound.play('click.mp3')
   } else if (result.isCorrect === false) {
@@ -369,39 +369,39 @@ const handleCellClick = (row, col, num) => {
 
 ---
 
-## 🎯 Decisiones de Diseño
+## Design Decisions
 
-| Decision | Razón |
-|----------|-------|
-| **GameLogic = JS puro** | Reutilizable en web + mobile sin cambios |
-| **Separar lógica de UI** | Facilita testing y debugging |
-| **Historial de estados** | Permite undo/redo sin complejidad |
-| **Validación incremental** | No recalcula toda la solución |
-| **Firebase Realtime** | Mejor para juegos (sync rápido) |
-| **Firestore para resultados** | Mejor para analytics (queries) |
-| **Anonymous auth** | Frictionless UX (no requiere email) |
+| Decision | Reason |
+|----------|--------|
+| **GameLogic = pure JS** | Reusable across web + mobile without changes |
+| **Separate logic from UI** | Easier testing and debugging |
+| **State history** | Enables undo/redo without complexity |
+| **Incremental validation** | Doesn't recalculate the entire solution |
+| **Firebase Realtime** | Better for games (fast sync) |
+| **Firestore for results** | Better for analytics (queries) |
+| **Anonymous auth** | Frictionless UX (no email required) |
 
 ---
 
-## 🚀 Performance
+## Performance
 
-| Operación | Tiempo |
-|-----------|--------|
-| Generar Sudoku | ~100-200ms |
+| Operation | Time |
+|-----------|------|
+| Generate Sudoku | ~100-200ms |
 | placeNumber() | < 1ms |
 | isSolved() | < 5ms |
 | hasConflict() | < 1ms |
-| Guardar en Firebase | ~100ms |
+| Save to Firebase | ~100ms |
 | Leaderboard query | ~50-200ms |
 
 **Memory:**
 - GameLogic instance: ~50KB
 - Board storage: ~1KB
-- Historial (100 states): ~100KB
+- History (100 states): ~100KB
 
 ---
 
-## 🔐 Security
+## Security
 
 **Firestore Rules:**
 ```javascript
@@ -415,11 +415,11 @@ match /games/{gameId} {
 }
 
 match /leaderboards/{difficulty}/{userId} {
-  allow read: if true;  // públicos
-  allow write: if false; // solo server-side updates
+  allow read: if true;  // public
+  allow write: if false; // server-side updates only
 }
 ```
 
 ---
 
-**Última actualización:** 25/02/2026
+**Last Updated:** 2026-02-25

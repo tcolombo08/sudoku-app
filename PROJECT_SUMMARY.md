@@ -1,47 +1,47 @@
-# 📊 Sudoku App - Project Summary
+# Sudoku App - Project Summary
 
 ## What is this?
 
 A complete **Sudoku game application** built with modern tech stack:
-- 🎮 Game logic (JavaScript)
-- 🔥 Backend (Firebase)
-- 💻 Web frontend (React - coming soon)
-- 📱 Mobile app (React Native - coming soon)
+- Game logic (JavaScript)
+- Backend (Firebase)
+- Web frontend (React - coming soon)
+- Mobile app (React Native - coming soon)
 
 ## Status
 
-**40% Complete** - Backend & Logic Ready ✅
+**40% Complete** - Backend & Logic Ready
 
 ```
-✅ Game Logic        - Complete (GameLogic.js)
-✅ Sudoku Generator  - Complete (SudokuGenerator.js)
-✅ Firebase Backend  - Complete (firebase.js)
-⏳ Web UI            - Next (React)
-⏳ Mobile App        - After (React Native)
+Game Logic        - Complete (GameLogic.js)
+Sudoku Generator  - Complete (SudokuGenerator.js)
+Firebase Backend  - Complete (firebase.js)
+Web UI            - Next (React)
+Mobile App        - After (React Native)
 ```
 
 ## Key Features
 
-### Current ✅
-- 🎲 **4 difficulty levels** (easy, medium, hard, expert)
-- 📝 **Annotation mode** (draft numbers)
-- ✔️ **Complete mode** (validate against solution)
-- ❤️ **3 lives system** (lose on mistakes)
-- ⏱️ **Timer** (track time spent)
-- ↩️ **Undo/Redo** (full history)
-- 💡 **Hints** (get answer without penalty)
-- 📊 **Statistics** (track errors, moves, hints)
-- 🔐 **Anonymous Auth** (no email needed)
-- 🏆 **Leaderboard** (top 10 per difficulty)
-- 💾 **Save progress** (resume later)
+### Current
+- **4 difficulty levels** (easy, medium, hard, expert)
+- **Annotation mode** (draft numbers)
+- **Complete mode** (validate against solution)
+- **3 lives system** (lose on mistakes)
+- **Timer** (track time spent)
+- **Undo/Redo** (full history)
+- **Hints** (get answer without penalty)
+- **Statistics** (track errors, moves, hints)
+- **Anonymous Auth** (no email needed)
+- **Leaderboard** (top 10 per difficulty)
+- **Save progress** (resume later)
 
-### Planned 🚀
-- 🎨 **Beautiful UI** (React + Tailwind)
-- 📱 **Mobile native** (iOS + Android)
-- 📢 **Ad support** (AdMob)
-- ⭐ **Premium membership** (no ads)
-- 🔊 **Sounds & vibration** (feedback)
-- 🌐 **Offline mode** (play without internet)
+### Planned
+- **Beautiful UI** (React + Tailwind)
+- **Mobile native** (iOS + Android)
+- **Ad support** (AdMob)
+- **Premium membership** (no ads)
+- **Sounds & vibration** (feedback)
+- **Offline mode** (play without internet)
 
 ## Technology Stack
 
@@ -58,13 +58,13 @@ A complete **Sudoku game application** built with modern tech stack:
 
 ```
 sudoku-app/
-├── shared/              # ✅ Core logic (no dependencies)
+├── shared/              # Core logic (no dependencies)
 │   ├── sudokuGenerator.js
 │   ├── gameLogic.js
 │   └── firebase.js
-├── web/                 # 🚀 React web app
-├── mobile/              # ⏳ React Native app
-├── docs/                # 📚 Complete documentation
+├── web/                 # React web app
+├── mobile/              # React Native app
+├── docs/                # Complete documentation
 └── README.md           # Quick overview
 ```
 
@@ -75,7 +75,7 @@ sudoku-app/
 | **Lines of Code** | 1,200+ |
 | **Functions** | 42 |
 | **Test Cases** | 12 |
-| **Test Pass Rate** | 100% ✅ |
+| **Test Pass Rate** | 100% |
 | **Documentation** | 12,000+ words |
 | **Time Invested** | ~7 hours |
 | **Remaining** | ~25 hours |
@@ -92,7 +92,7 @@ npm install
 ### 2. Run Tests
 ```bash
 npm test
-# Should see: ✅ TODOS LOS TESTS COMPLETADOS
+# Should see: ALL TESTS COMPLETED
 ```
 
 ### 3. Configure Firebase (Optional for testing)
@@ -114,28 +114,28 @@ npm create vite@latest . -- --template react
 ### Game Flow
 ```
 1. User starts game
-   ↓
+   v
 2. SudokuGenerator creates puzzle
-   ↓
+   v
 3. GameLogic manages game state
-   ↓
+   v
 4. User plays (annotation/complete mode)
-   ↓
+   v
 5. Firebase saves progress every 10s
-   ↓
+   v
 6. User wins/loses
-   ↓
+   v
 7. Firebase saves result + updates leaderboard
 ```
 
 ### Data Flow
 ```
 React Component
-    ↓
+    v
 GameLogic (validation)
-    ↓
+    v
 Firebase (persistence)
-    ↓
+    v
 Firestore + Realtime DB
 ```
 
@@ -160,11 +160,11 @@ Firestore + Realtime DB
 
 | File | Size | Status |
 |------|------|--------|
-| sudokuGenerator.js | 5.4 KB | ✅ |
-| gameLogic.js | 11 KB | ✅ |
-| firebase.js | 15 KB | ✅ |
-| tests | 6 KB | ✅ |
-| docs | 20 KB | ✅ |
+| sudokuGenerator.js | 5.4 KB | Done |
+| gameLogic.js | 11 KB | Done |
+| firebase.js | 15 KB | Done |
+| tests | 6 KB | Done |
+| docs | 20 KB | Done |
 
 **Total Backend**: ~50 KB (no dependencies!)
 
@@ -190,50 +190,50 @@ Firestore + Realtime DB
 
 ## Code Quality
 
-- ✅ 100% test pass rate
-- ✅ Full JSDoc comments
-- ✅ Error handling
-- ✅ Security best practices
-- ✅ Mobile-first design
-- ✅ Offline-ready architecture
+- 100% test pass rate
+- Full JSDoc comments
+- Error handling
+- Security best practices
+- Mobile-first design
+- Offline-ready architecture
 
 ## Documentation Included
 
-- 📖 `README.md` - Project overview
-- 🏗️ `ARCHITECTURE.md` - System design + diagrams
-- 🚀 `QUICKSTART.md` - Get started guide
-- 🔥 `docs/FIREBASE-SETUP.md` - Firebase configuration
-- 📚 `docs/FIREBASE-API.md` - Complete API reference
-- 📊 `PROGRESS.md` - Development progress tracker
+- `README.md` - Project overview
+- `ARCHITECTURE.md` - System design + diagrams
+- `QUICKSTART.md` - Get started guide
+- `docs/FIREBASE-SETUP.md` - Firebase configuration
+- `docs/FIREBASE-API.md` - Complete API reference
+- `PROGRESS.md` - Development progress tracker
 
 ## Roadmap
 
-### Phase 1 ✅ DONE
+### Phase 1 - DONE
 - Core game logic
 - Sudoku generator
 - Firebase backend
 
-### Phase 2 🚀 IN PROGRESS
+### Phase 2 - IN PROGRESS
 - Web UI (React)
 - User interface components
 - Game board visualization
 
-### Phase 3 ⏳ PLANNED
+### Phase 3 - PLANNED
 - Mobile app (React Native)
 - Platform-specific optimizations
 - Ad integration
 
-### Phase 4 ⏳ PLANNED
+### Phase 4 - PLANNED
 - App Store deployment
 - Play Store deployment
 - Analytics & monitoring
 
 ## Who should use this?
 
-- 👨‍💻 Developers learning game development
-- 📱 Entrepreneurs wanting to launch a game
-- 🎓 Students studying Firebase + React + React Native
-- 🏆 Anyone wanting a complete game starter template
+- Developers learning game development
+- Entrepreneurs wanting to launch a game
+- Students studying Firebase + React + React Native
+- Anyone wanting a complete game starter template
 
 ## License
 
@@ -253,7 +253,7 @@ Contributions welcome! See issues or create a pull request.
 
 ## Key Highlights
 
-✨ **What makes this special:**
+**What makes this special:**
 
 1. **Zero dependencies in core logic** - Pure JavaScript
 2. **Works everywhere** - Node.js, browsers, React Native
@@ -266,14 +266,14 @@ Contributions welcome! See issues or create a pull request.
 
 ## Next Steps
 
-1. ⭐ Star this repo (help spread the word!)
-2. 🍴 Fork it (customize for your needs)
-3. 📖 Read QUICKSTART.md (get started)
-4. 🔥 Setup Firebase (add backend)
-5. 💻 Build web UI (start developing)
+1. Star this repo (help spread the word!)
+2. Fork it (customize for your needs)
+3. Read QUICKSTART.md (get started)
+4. Setup Firebase (add backend)
+5. Build web UI (start developing)
 
-**Everything is documented. Go build! 🚀**
+**Everything is documented. Go build!**
 
 ---
 
-**Made with ❤️ | Version 1.0 | February 2026**
+**Made with love | Version 1.0 | February 2026**

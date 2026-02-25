@@ -1,6 +1,6 @@
 /**
- * Lógica del juego de Sudoku
- * Maneja: validación, notas, vidas, temporizador, detección de victoria
+ * Sudoku game logic
+ * Handles: validation, notes, lives, timer, win detection
  */
 
 class GameLogic {
@@ -9,33 +9,33 @@ class GameLogic {
     this.SUBGRID_SIZE = 3;
     this.EMPTY = 0;
 
-    // Estado del juego
-    this.puzzle = puzzle.map(row => [...row]); // Puzzle original (no se modifica)
-    this.solution = solution.map(row => [...row]); // Solución para validación
-    this.board = puzzle.map(row => [...row]); // Tablero actual del jugador
+    // Game state
+    this.puzzle = puzzle.map(row => [...row]); // Original puzzle (immutable)
+    this.solution = solution.map(row => [...row]); // Solution for validation
+    this.board = puzzle.map(row => [...row]); // Current player board
 
-    // Sistema de notas (borrador)
-    // notes[row][col] = [1,2,3] = números candidatos
+    // Notes system (draft)
+    // notes[row][col] = [1,2,3] = candidate numbers
     this.notes = Array(this.GRID_SIZE)
       .fill(null)
       .map(() =>
         Array(this.GRID_SIZE).fill(null).map(() => [])
       );
 
-    // Estado del juego
+    // Game state
     this.lives = 3;
     this.maxLives = 3;
     this.startTime = Date.now();
     this.elapsedSeconds = 0;
     this.isGameOver = false;
     this.isWon = false;
-    this.mode = 'annotation'; // 'annotation' o 'complete'
+    this.mode = 'annotation'; // 'annotation' or 'complete'
 
-    // Historial de movimientos (para undo/redo)
+    // Move history (for undo/redo)
     this.history = [];
     this.historyIndex = -1;
 
-    // Estadísticas
+    // Statistics
     this.stats = {
       movementsTotal: 0,
       mistakesMade: 0,
@@ -44,70 +44,70 @@ class GameLogic {
   }
 
   /**
-   * MODO: Cambiar entre anotación y completado
+   * MODE: Switch between annotation and complete mode
    */
   setMode(mode) {
     if (!['annotation', 'complete'].includes(mode)) {
-      throw new Error("Modo debe ser 'annotation' o 'complete'");
+      throw new Error("Mode must be 'annotation' or 'complete'");
     }
     this.mode = mode;
   }
 
   /**
-   * ENTRADA DE NÚMERO
-   * @param {number} row - Fila (0-8)
-   * @param {number} col - Columna (0-8)
-   * @param {number} num - Número (1-9) o 0 para borrar
+   * NUMBER INPUT
+   * @param {number} row - Row (0-8)
+   * @param {number} col - Column (0-8)
+   * @param {number} num - Number (1-9) or 0 to clear
    * @returns {object} { success, message, isCorrect, isWon }
    */
   placeNumber(row, col, num) {
-    // Validaciones básicas
+    // Basic validations
     if (!this.isValidCoordinate(row, col)) {
-      return { success: false, message: 'Coordenadas inválidas' };
+      return { success: false, message: 'Invalid coordinates' };
     }
 
     if (num < 0 || num > 9 || !Number.isInteger(num)) {
-      return { success: false, message: 'Número debe estar entre 0-9' };
+      return { success: false, message: 'Number must be between 0-9' };
     }
 
-    // No se puede modificar números originales del puzzle
+    // Cannot modify original puzzle numbers
     if (this.puzzle[row][col] !== this.EMPTY) {
-      return { success: false, message: 'No puedes modificar números originales' };
+      return { success: false, message: 'Cannot modify original numbers' };
     }
 
-    // Guardar estado anterior en historial
+    // Save previous state to history
     this.saveToHistory();
 
-    // MODO ANOTACIÓN: solo agregar/quitar del borrador
+    // ANNOTATION MODE: only add/remove from draft
     if (this.mode === 'annotation') {
       return this.toggleAnnotation(row, col, num);
     }
 
-    // MODO COMPLETAR: validar contra solución
+    // COMPLETE MODE: validate against solution
     if (this.mode === 'complete') {
       return this.placeAndValidate(row, col, num);
     }
   }
 
   /**
-   * MODO ANOTACIÓN: agregar/quitar números del borrador
+   * ANNOTATION MODE: toggle numbers in draft
    */
   toggleAnnotation(row, col, num) {
     if (num === 0) {
-      // Borrar todas las anotaciones
+      // Clear all annotations
       this.notes[row][col] = [];
       this.stats.movementsTotal++;
-      return { success: true, message: 'Anotaciones borradas', isCorrect: null };
+      return { success: true, message: 'Annotations cleared', isCorrect: null };
     }
 
     const currentNotes = this.notes[row][col];
     const index = currentNotes.indexOf(num);
 
     if (index > -1) {
-      // Ya existe, removarlo
+      // Already exists, remove it
       currentNotes.splice(index, 1);
     } else {
-      // Agregar
+      // Add it
       currentNotes.push(num);
       currentNotes.sort((a, b) => a - b);
     }
@@ -115,39 +115,38 @@ class GameLogic {
     this.stats.movementsTotal++;
     return {
       success: true,
-      message: `Anotación actualizada`,
+      message: 'Annotation updated',
       isCorrect: null,
       notes: currentNotes
     };
   }
 
   /**
-   * MODO COMPLETAR: validar número contra solución
+   * COMPLETE MODE: validate number against solution
    */
   placeAndValidate(row, col, num) {
     if (num === 0) {
-      // Borrar número (siempre válido)
+      // Clear number (always valid)
       this.board[row][col] = this.EMPTY;
       this.notes[row][col] = [];
       this.stats.movementsTotal++;
-      return { success: true, message: 'Número borrado', isCorrect: null };
+      return { success: true, message: 'Number cleared', isCorrect: null };
     }
 
     const correctNumber = this.solution[row][col];
     const isCorrect = num === correctNumber;
 
     if (isCorrect) {
-      // ✅ Correcto
       this.board[row][col] = num;
       this.notes[row][col] = [];
       this.stats.movementsTotal++;
 
-      // Verificar si ganó
+      // Check if won
       if (this.isSolved()) {
         this.endGame(true);
         return {
           success: true,
-          message: '¡Sudoku completado!',
+          message: 'Sudoku completed!',
           isCorrect: true,
           isWon: true
         };
@@ -155,11 +154,10 @@ class GameLogic {
 
       return {
         success: true,
-        message: 'Correcto!',
+        message: 'Correct!',
         isCorrect: true
       };
     } else {
-      // ❌ Incorrecto
       this.lives--;
       this.stats.mistakesMade++;
       this.stats.movementsTotal++;
@@ -168,7 +166,7 @@ class GameLogic {
         this.endGame(false);
         return {
           success: true,
-          message: '¡Game Over! No te quedan vidas.',
+          message: 'Game Over! No lives remaining.',
           isCorrect: false,
           isGameOver: true,
           livesRemaining: 0
@@ -177,7 +175,7 @@ class GameLogic {
 
       return {
         success: true,
-        message: `¡Incorrecto! Te quedan ${this.lives} vidas.`,
+        message: `Incorrect! ${this.lives} lives remaining.`,
         isCorrect: false,
         livesRemaining: this.lives
       };
@@ -185,19 +183,19 @@ class GameLogic {
   }
 
   /**
-   * VIDAS: Recuperar una vida viendo un ad
-   * (lógica del ad se maneja en la UI)
+   * LIVES: Restore a life by watching an ad
+   * (ad logic is handled in the UI)
    */
   restoreLife() {
     if (this.lives < this.maxLives) {
       this.lives++;
-      return { success: true, message: 'Vida restaurada', livesRemaining: this.lives };
+      return { success: true, message: 'Life restored', livesRemaining: this.lives };
     }
-    return { success: false, message: 'Ya tienes el máximo de vidas' };
+    return { success: false, message: 'Already at max lives' };
   }
 
   /**
-   * TEMPORIZADOR: actualizar tiempo transcurrido
+   * TIMER: update elapsed time
    */
   updateTimer() {
     this.elapsedSeconds = Math.floor((Date.now() - this.startTime) / 1000);
@@ -205,7 +203,7 @@ class GameLogic {
   }
 
   /**
-   * FORMATO: convertir segundos a "HH:MM:SS"
+   * FORMAT: convert seconds to "HH:MM:SS"
    */
   formatTime(seconds) {
     const hours = Math.floor(seconds / 3600);
@@ -219,10 +217,10 @@ class GameLogic {
   }
 
   /**
-   * VICTORIA: verificar si el Sudoku está resuelto
+   * WIN: check if the Sudoku is solved
    */
   isSolved() {
-    // Todos los números deben estar en el tablero
+    // All cells must be filled
     for (let row = 0; row < this.GRID_SIZE; row++) {
       for (let col = 0; col < this.GRID_SIZE; col++) {
         if (this.board[row][col] === this.EMPTY) {
@@ -231,7 +229,7 @@ class GameLogic {
       }
     }
 
-    // Validar que coincida con la solución
+    // Validate that it matches the solution
     for (let row = 0; row < this.GRID_SIZE; row++) {
       for (let col = 0; col < this.GRID_SIZE; col++) {
         if (this.board[row][col] !== this.solution[row][col]) {
@@ -244,19 +242,19 @@ class GameLogic {
   }
 
   /**
-   * AYUDA: obtener un número de la solución (no pierde vidas)
+   * HINT: get a number from the solution (no life penalty)
    */
   getHint(row, col) {
     if (!this.isValidCoordinate(row, col)) {
-      return { success: false, message: 'Coordenada inválida' };
+      return { success: false, message: 'Invalid coordinate' };
     }
 
     if (this.puzzle[row][col] !== this.EMPTY) {
-      return { success: false, message: 'Esta celda es fija' };
+      return { success: false, message: 'This cell is fixed' };
     }
 
     if (this.board[row][col] !== this.EMPTY) {
-      return { success: false, message: 'Esta celda ya está completada' };
+      return { success: false, message: 'This cell is already filled' };
     }
 
     const hint = this.solution[row][col];
@@ -265,28 +263,28 @@ class GameLogic {
     return {
       success: true,
       hint,
-      message: `Pista: ${hint}`
+      message: `Hint: ${hint}`
     };
   }
 
   /**
-   * VALIDACIÓN: verificar si un número viola reglas de Sudoku
-   * (útil para UI: mostrar números duplicados antes de confirmar)
+   * VALIDATION: check if a number violates Sudoku rules
+   * (useful for UI: show duplicate numbers before confirming)
    */
   hasConflict(row, col, num) {
     if (num === this.EMPTY) return false;
 
-    // Validar fila
+    // Validate row
     for (let c = 0; c < this.GRID_SIZE; c++) {
       if (c !== col && this.board[row][c] === num) return true;
     }
 
-    // Validar columna
+    // Validate column
     for (let r = 0; r < this.GRID_SIZE; r++) {
       if (r !== row && this.board[r][col] === num) return true;
     }
 
-    // Validar subgrid 3x3
+    // Validate 3x3 subgrid
     const subgridRow = Math.floor(row / this.SUBGRID_SIZE) * this.SUBGRID_SIZE;
     const subgridCol = Math.floor(col / this.SUBGRID_SIZE) * this.SUBGRID_SIZE;
 
@@ -302,10 +300,10 @@ class GameLogic {
   }
 
   /**
-   * HISTORIAL: guardar estado para undo
+   * HISTORY: save state for undo
    */
   saveToHistory() {
-    // Remover redo si hay
+    // Remove redo entries if any
     this.history = this.history.slice(0, this.historyIndex + 1);
 
     this.history.push({
@@ -320,7 +318,7 @@ class GameLogic {
   }
 
   /**
-   * UNDO: deshacer último movimiento
+   * UNDO: undo last move
    */
   undo() {
     if (this.historyIndex > 0) {
@@ -333,13 +331,13 @@ class GameLogic {
       );
       this.lives = state.lives;
 
-      return { success: true, message: 'Movimiento deshecho' };
+      return { success: true, message: 'Move undone' };
     }
-    return { success: false, message: 'No hay movimientos para deshacer' };
+    return { success: false, message: 'No moves to undo' };
   }
 
   /**
-   * REDO: rehacer movimiento
+   * REDO: redo move
    */
   redo() {
     if (this.historyIndex < this.history.length - 1) {
@@ -352,13 +350,13 @@ class GameLogic {
       );
       this.lives = state.lives;
 
-      return { success: true, message: 'Movimiento rehecho' };
+      return { success: true, message: 'Move redone' };
     }
-    return { success: false, message: 'No hay movimientos para rehacer' };
+    return { success: false, message: 'No moves to redo' };
   }
 
   /**
-   * ESTADO ACTUAL: obtener snapshot del tablero
+   * CURRENT STATE: get board snapshot
    */
   getState() {
     return {
@@ -375,7 +373,7 @@ class GameLogic {
   }
 
   /**
-   * TERMINAR JUEGO
+   * END GAME
    */
   endGame(won) {
     this.isGameOver = true;
@@ -384,7 +382,7 @@ class GameLogic {
   }
 
   /**
-   * RESULTADO FINAL: para guardar en estadísticas
+   * FINAL RESULT: for saving to statistics
    */
   getResult() {
     return {
@@ -397,7 +395,7 @@ class GameLogic {
   }
 
   /**
-   * UTILIDADES
+   * UTILITIES
    */
   isValidCoordinate(row, col) {
     return (
@@ -411,7 +409,7 @@ class GameLogic {
   }
 
   /**
-   * DEBUG: imprimir tablero actual
+   * DEBUG: print current board
    */
   boardToString() {
     return this.board
@@ -420,7 +418,7 @@ class GameLogic {
   }
 
   /**
-   * DEBUG: imprimir notas
+   * DEBUG: print notes
    */
   notesToString() {
     return this.notes
@@ -435,7 +433,4 @@ class GameLogic {
   }
 }
 
-// Exportar para Node.js y navegador
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = GameLogic;
-}
+export default GameLogic;

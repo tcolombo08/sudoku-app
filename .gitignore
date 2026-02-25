@@ -8,7 +8,7 @@ yarn-error.log
 .env.local
 .env.*.local
 
-# Firebase config (IMPORTANTE: no commitear credenciales reales)
+# Firebase config (IMPORTANT: never commit real credentials)
 web/src/config/firebase.config.js
 mobile/src/config/firebase.config.js
 firebase-config.template.js

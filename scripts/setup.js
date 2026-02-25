@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 
 /**
- * Setup script para Sudoku App
- * Ejecutar con: npm run setup
- * 
- * Este script:
- * 1. Verifica Node.js
- * 2. Instala dependencias
- * 3. Guía al usuario en la configuración de Firebase
- * 4. Crea archivos de configuración
+ * Setup script for Sudoku App
+ * Run with: npm run setup
+ *
+ * This script:
+ * 1. Checks Node.js version
+ * 2. Installs dependencies
+ * 3. Guides user through Firebase configuration
+ * 4. Creates config files
  */
 
 const fs = require('fs');
@@ -23,36 +23,36 @@ const rl = readline.createInterface({
 const question = (query) => new Promise((resolve) => rl.question(query, resolve));
 
 async function main() {
-  console.log('\n╔════════════════════════════════════════╗');
-  console.log('║   SUDOKU APP - Setup Wizard            ║');
-  console.log('╚════════════════════════════════════════╝\n');
+  console.log('\n+========================================+');
+  console.log('|   SUDOKU APP - Setup Wizard            |');
+  console.log('+========================================+\n');
 
   // Check Node.js
-  console.log('✓ Node.js version:', process.version);
+  console.log('Node.js version:', process.version);
 
   // Check structure
-  console.log('\n📁 Verificando estructura...');
+  console.log('\nChecking structure...');
   const dirs = ['shared', 'web', 'mobile', 'docs'];
   dirs.forEach(dir => {
     if (fs.existsSync(path.join(__dirname, '..', dir))) {
-      console.log(`  ✓ ${dir}/`);
+      console.log(`  ok: ${dir}/`);
     } else {
-      console.log(`  ✗ Falta: ${dir}/`);
+      console.log(`  missing: ${dir}/`);
     }
   });
 
   // Firebase setup
-  console.log('\n🔥 Configuración de Firebase\n');
-  console.log('Para usar Firebase, necesitas:');
-  console.log('1. Ir a https://firebase.google.com');
-  console.log('2. Crear un nuevo proyecto');
-  console.log('3. Copiar la configuración\n');
+  console.log('\nFirebase Configuration\n');
+  console.log('To use Firebase, you need to:');
+  console.log('1. Go to https://firebase.google.com');
+  console.log('2. Create a new project');
+  console.log('3. Copy the configuration\n');
 
-  const setupFirebase = await question('¿Deseas configurar Firebase ahora? (y/n): ');
+  const setupFirebase = await question('Do you want to configure Firebase now? (y/n): ');
 
   if (setupFirebase.toLowerCase() === 'y') {
     const apiKey = await question('\nAPI Key: ');
-    const authDomain = await question('Auth Domain (ej: proyecto.firebaseapp.com): ');
+    const authDomain = await question('Auth Domain (e.g.: project.firebaseapp.com): ');
     const projectId = await question('Project ID: ');
     const storageBucket = await question('Storage Bucket: ');
     const messagingSenderId = await question('Messaging Sender ID: ');
@@ -70,42 +70,42 @@ async function main() {
 export default firebaseConfig;
 `;
 
-    // Crear archivo de configuración
+    // Create config file
     const configPath = path.join(__dirname, '..', 'firebase.config.js');
     fs.writeFileSync(configPath, configContent);
-    console.log('\n✓ firebase.config.js creado');
-    console.log('⚠️  Asegúrate de que está en .gitignore');
+    console.log('\nfirebase.config.js created');
+    console.log('Make sure it is listed in .gitignore');
   }
 
   // Create directories for web and mobile
-  console.log('\n📦 Preparando directorios...');
+  console.log('\nPreparing directories...');
 
   const webSrcPath = path.join(__dirname, '..', 'web', 'src');
   if (!fs.existsSync(webSrcPath)) {
     fs.mkdirSync(webSrcPath, { recursive: true });
-    console.log('  ✓ web/src/');
+    console.log('  ok: web/src/');
   }
 
   const mobileSrcPath = path.join(__dirname, '..', 'mobile', 'src');
   if (!fs.existsSync(mobileSrcPath)) {
     fs.mkdirSync(mobileSrcPath, { recursive: true });
-    console.log('  ✓ mobile/src/');
+    console.log('  ok: mobile/src/');
   }
 
   // Summary
-  console.log('\n╔════════════════════════════════════════╗');
-  console.log('║   ✅ Setup Completado                  ║');
-  console.log('╚════════════════════════════════════════╝\n');
+  console.log('\n+========================================+');
+  console.log('|   Setup Completed                      |');
+  console.log('+========================================+\n');
 
-  console.log('Próximos pasos:');
-  console.log('1. npm test          (ejecutar tests)');
-  console.log('2. npm run dev:web   (iniciar frontend web)');
-  console.log('3. Leer README.md    (documentación)\n');
+  console.log('Next steps:');
+  console.log('1. npm test          (run tests)');
+  console.log('2. npm run dev:web   (start web frontend)');
+  console.log('3. Read README.md    (documentation)\n');
 
   if (setupFirebase.toLowerCase() !== 'y') {
-    console.log('⚠️  Firebase no configurado');
-    console.log('   Renombra firebase.config.template.js a firebase.config.js');
-    console.log('   y actualiza los valores\n');
+    console.log('Firebase not configured');
+    console.log('   Rename firebase.config.template.js to firebase.config.js');
+    console.log('   and update the values\n');
   }
 
   rl.close();

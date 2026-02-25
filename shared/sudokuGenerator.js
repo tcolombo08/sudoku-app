@@ -1,9 +1,9 @@
 /**
- * Generador de Sudokus con validación y múltiples niveles de dificultad
- * Arquitectura:
- * 1. Generar tablero válido lleno (9x9)
- * 2. Remover números según dificultad
- * 3. Validar que tenga solución única
+ * Sudoku generator with validation and multiple difficulty levels
+ * Architecture:
+ * 1. Generate a valid filled board (9x9)
+ * 2. Remove numbers based on difficulty
+ * 3. Validate unique solution
  */
 
 class SudokuGenerator {
@@ -12,35 +12,35 @@ class SudokuGenerator {
     this.SUBGRID_SIZE = 3;
     this.EMPTY = 0;
 
-    // Números de celdas vacías por dificultad
+    // Number of empty cells per difficulty
     this.DIFFICULTY_LEVELS = {
-      easy: { min: 30, max: 40 },      // 40-50 números visibles
-      medium: { min: 40, max: 50 },    // 30-40 números visibles
-      hard: { min: 50, max: 60 },      // 20-30 números visibles
-      expert: { min: 60, max: 70 }     // 10-20 números visibles
+      easy: { min: 30, max: 40 },      // 40-50 visible numbers
+      medium: { min: 40, max: 50 },    // 30-40 visible numbers
+      hard: { min: 50, max: 60 },      // 20-30 visible numbers
+      expert: { min: 60, max: 70 }     // 10-20 visible numbers
     };
   }
 
   /**
-   * Genera un nuevo Sudoku completamente lleno y válido
+   * Generates a new fully filled and valid Sudoku board
    */
   generateFullBoard() {
     const board = Array(this.GRID_SIZE)
       .fill(null)
       .map(() => Array(this.GRID_SIZE).fill(this.EMPTY));
 
-    // Llenar la diagonal de 3x3 (garantiza viabilidad)
+    // Fill the 3x3 diagonal (guarantees feasibility)
     for (let i = 0; i < this.GRID_SIZE; i += this.SUBGRID_SIZE) {
       this.fillSubgrid(board, i, i);
     }
 
-    // Resolver el resto con backtracking
+    // Solve the rest with backtracking
     this.solveBoard(board);
     return board;
   }
 
   /**
-   * Llena un subgrid 3x3 con números aleatorios válidos
+   * Fills a 3x3 subgrid with valid random numbers
    */
   fillSubgrid(board, row, col) {
     const numbers = this.shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]);
@@ -54,7 +54,7 @@ class SudokuGenerator {
   }
 
   /**
-   * Resuelve el tablero usando backtracking
+   * Solves the board using backtracking
    */
   solveBoard(board) {
     for (let row = 0; row < this.GRID_SIZE; row++) {
@@ -81,18 +81,18 @@ class SudokuGenerator {
   }
 
   /**
-   * Valida si un número es válido en una posición
+   * Validates whether a number is valid at a given position
    */
   isValid(board, row, col, num) {
-    // Validar fila
+    // Validate row
     if (board[row].includes(num)) return false;
 
-    // Validar columna
+    // Validate column
     for (let i = 0; i < this.GRID_SIZE; i++) {
       if (board[i][col] === num) return false;
     }
 
-    // Validar subgrid 3x3
+    // Validate 3x3 subgrid
     const subgridRow = Math.floor(row / this.SUBGRID_SIZE) * this.SUBGRID_SIZE;
     const subgridCol = Math.floor(col / this.SUBGRID_SIZE) * this.SUBGRID_SIZE;
 
@@ -106,22 +106,22 @@ class SudokuGenerator {
   }
 
   /**
-   * Genera un Sudoku con nivel de dificultad
+   * Generates a Sudoku with a given difficulty level
    * @param {string} difficulty - 'easy', 'medium', 'hard', 'expert'
    * @returns {object} { puzzle, solution, difficulty }
    */
   generate(difficulty = 'medium') {
     if (!this.DIFFICULTY_LEVELS[difficulty]) {
       throw new Error(
-        `Dificultad inválida. Usa: ${Object.keys(this.DIFFICULTY_LEVELS).join(', ')}`
+        `Invalid difficulty. Use: ${Object.keys(this.DIFFICULTY_LEVELS).join(', ')}`
       );
     }
 
-    // Generar tablero completo
+    // Generate full board
     const solution = this.generateFullBoard();
     const puzzle = solution.map(row => [...row]);
 
-    // Remover números según dificultad
+    // Remove numbers based on difficulty
     const { min, max } = this.DIFFICULTY_LEVELS[difficulty];
     const cellsToRemove = Math.floor(Math.random() * (max - min + 1)) + min;
 
@@ -145,7 +145,7 @@ class SudokuGenerator {
   }
 
   /**
-   * Valida un tablero completamente lleno
+   * Validates a fully filled board
    */
   isValidSolution(board) {
     for (let row = 0; row < this.GRID_SIZE; row++) {
@@ -153,7 +153,7 @@ class SudokuGenerator {
         const num = board[row][col];
         if (num === this.EMPTY) return false;
 
-        // Quitar temporalmente para validar
+        // Temporarily remove to validate
         board[row][col] = this.EMPTY;
         const isValid = this.isValid(board, row, col, num);
         board[row][col] = num;
@@ -165,7 +165,7 @@ class SudokuGenerator {
   }
 
   /**
-   * Cuenta números visibles en el puzzle
+   * Counts visible numbers in the puzzle
    */
   countVisibleNumbers(puzzle) {
     let count = 0;
@@ -178,7 +178,7 @@ class SudokuGenerator {
   }
 
   /**
-   * Utility: mezcla un array (Fisher-Yates)
+   * Utility: shuffles an array (Fisher-Yates)
    */
   shuffle(array) {
     const shuffled = [...array];
@@ -190,7 +190,7 @@ class SudokuGenerator {
   }
 
   /**
-   * Convierte el tablero a formato string para debug
+   * Converts the board to a string format for debugging
    */
   boardToString(board) {
     return board
@@ -199,7 +199,4 @@ class SudokuGenerator {
   }
 }
 
-// Exportar para Node.js y navegador
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = SudokuGenerator;
-}
+export default SudokuGenerator;

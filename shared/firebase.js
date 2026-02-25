@@ -1,8 +1,8 @@
 /**
- * Firebase Service para Sudoku App
- * Maneja: Auth, persistencia de juegos, leaderboards, perfil de usuario
+ * Firebase Service for Sudoku App
+ * Handles: Auth, game persistence, leaderboards, user profile
  *
- * Inicialización requerida en main app:
+ * Required initialization in main app:
  * const firebaseService = new FirebaseService(firebaseConfig);
  * await firebaseService.initialize();
  */
@@ -17,14 +17,14 @@ class FirebaseService {
   }
 
   /**
-   * Inicializar Firebase
-   * Debe ser llamado una vez al cargar la app
+   * Initialize Firebase
+   * Must be called once when the app loads
    */
   async initialize() {
     try {
-      // Importar dinámicamente en Node.js o navegador
+      // Dynamic import for Node.js or browser
       if (typeof window !== 'undefined') {
-        // Navegador
+        // Browser
         const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js');
         const { getAuth, signInAnonymously, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js');
         const { getFirestore } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js');
@@ -37,22 +37,22 @@ class FirebaseService {
           realtime: getDatabase(app)
         };
 
-        // Autenticación automática
+        // Automatic authentication
         await this.setupAuth();
         return true;
       } else {
-        // Node.js (para testing)
-        console.warn('Firebase initialization en Node.js - usando mock');
+        // Node.js (for testing)
+        console.warn('Firebase initialization in Node.js - using mock');
         return this.initializeMock();
       }
     } catch (error) {
-      console.error('Error inicializando Firebase:', error);
+      console.error('Error initializing Firebase:', error);
       return false;
     }
   }
 
   /**
-   * Setup de autenticación anónima
+   * Anonymous authentication setup
    */
   async setupAuth() {
     return new Promise((resolve) => {
@@ -61,23 +61,22 @@ class FirebaseService {
         return;
       }
 
-      // Detectar cambios de auth
-      const { onAuthStateChanged } = require('firebase/auth');
+      // Listen for auth state changes
+      const { onAuthStateChanged, signInAnonymously } = await import('firebase/auth');
       onAuthStateChanged(this.auth, async (user) => {
         if (user) {
           this.userId = user.uid;
           await this.ensureUserProfile();
           resolve(true);
         } else {
-          // Iniciar sesión anónima
-          const { signInAnonymously } = require('firebase/auth');
+          // Start anonymous session
           try {
             const result = await signInAnonymously(this.auth);
             this.userId = result.user.uid;
             await this.ensureUserProfile();
             resolve(true);
           } catch (error) {
-            console.error('Error en auth:', error);
+            console.error('Auth error:', error);
             resolve(false);
           }
         }
@@ -86,7 +85,7 @@ class FirebaseService {
   }
 
   /**
-   * Asegurar que el usuario tiene un perfil
+   * Ensure user has a profile
    */
   async ensureUserProfile() {
     try {
@@ -96,12 +95,12 @@ class FirebaseService {
         await this.createUserProfile(randomNickname);
       }
     } catch (error) {
-      console.error('Error en ensureUserProfile:', error);
+      console.error('Error in ensureUserProfile:', error);
     }
   }
 
   /**
-   * AUTENTICACIÓN: Crear perfil de usuario
+   * AUTH: Create user profile
    */
   async createUserProfile(nickname) {
     if (!this.userId) return false;
@@ -132,13 +131,13 @@ class FirebaseService {
       this.nickname = nickname;
       return true;
     } catch (error) {
-      console.error('Error creando perfil:', error);
+      console.error('Error creating profile:', error);
       return false;
     }
   }
 
   /**
-   * USUARIO: Obtener perfil actual
+   * USER: Get current profile
    */
   async getUserProfile() {
     if (!this.userId) return null;
@@ -156,20 +155,20 @@ class FirebaseService {
       }
       return null;
     } catch (error) {
-      console.error('Error obteniendo perfil:', error);
+      console.error('Error getting profile:', error);
       return null;
     }
   }
 
   /**
-   * USUARIO: Cambiar nickname
+   * USER: Change nickname
    */
   async updateNickname(newNickname) {
     if (!this.userId) return false;
 
-    // Validar nickname
+    // Validate nickname
     if (!newNickname || newNickname.length < 2 || newNickname.length > 20) {
-      return { success: false, message: 'Nickname debe tener 2-20 caracteres' };
+      return { success: false, message: 'Nickname must be 2-20 characters' };
     }
 
     try {
@@ -181,15 +180,15 @@ class FirebaseService {
       });
 
       this.nickname = newNickname;
-      return { success: true, message: 'Nickname actualizado' };
+      return { success: true, message: 'Nickname updated' };
     } catch (error) {
-      console.error('Error actualizando nickname:', error);
-      return { success: false, message: 'Error actualizando nickname' };
+      console.error('Error updating nickname:', error);
+      return { success: false, message: 'Error updating nickname' };
     }
   }
 
   /**
-   * JUEGO: Guardar estado en progreso (Realtime DB para sync rápido)
+   * GAME: Save in-progress state (Realtime DB for fast sync)
    */
   async saveGameState(gameId, gameState) {
     if (!this.userId) return false;
@@ -211,13 +210,13 @@ class FirebaseService {
 
       return true;
     } catch (error) {
-      console.error('Error guardando estado:', error);
+      console.error('Error saving state:', error);
       return false;
     }
   }
 
   /**
-   * JUEGO: Obtener partida en progreso
+   * GAME: Get in-progress game
    */
   async getGameState(gameId) {
     if (!this.userId) return null;
@@ -233,13 +232,13 @@ class FirebaseService {
       }
       return null;
     } catch (error) {
-      console.error('Error obteniendo estado:', error);
+      console.error('Error getting state:', error);
       return null;
     }
   }
 
   /**
-   * JUEGO: Guardar resultado final (Firestore para persistencia + analytics)
+   * GAME: Save final result (Firestore for persistence + analytics)
    */
   async saveGameResult(result) {
     if (!this.userId) return false;
@@ -247,7 +246,7 @@ class FirebaseService {
     try {
       const { collection, addDoc, serverTimestamp, doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js');
 
-      // Guardar en colección games
+      // Save to games collection
       const gameRef = await addDoc(collection(this.db.firestore, 'games'), {
         userId: this.userId,
         difficulty: result.difficulty,
@@ -259,26 +258,26 @@ class FirebaseService {
         createdAt: serverTimestamp()
       });
 
-      // Actualizar estadísticas del usuario
+      // Update user stats
       await this.updateUserStats(result);
 
-      // Si ganó, actualizar leaderboard
+      // If won, update leaderboard
       if (result.won) {
         await this.updateLeaderboard(result.difficulty, result.time);
       }
 
-      // Eliminar partida en progreso
+      // Delete in-progress game
       await this.deleteGameState(result.gameId);
 
       return { success: true, gameId: gameRef.id };
     } catch (error) {
-      console.error('Error guardando resultado:', error);
+      console.error('Error saving result:', error);
       return { success: false, error: error.message };
     }
   }
 
   /**
-   * USUARIO: Actualizar estadísticas después de juego
+   * USER: Update stats after game
    */
   async updateUserStats(result) {
     if (!this.userId) return false;
@@ -293,7 +292,7 @@ class FirebaseService {
         'stats.totalHints': result.hints
       };
 
-      // Actualizar mejor tiempo si ganó
+      // Update best time if won
       if (result.won) {
         const profile = await this.getUserProfile();
         const currentBest = profile.stats.bestTimes[result.difficulty];
@@ -308,13 +307,13 @@ class FirebaseService {
       await updateDoc(userRef, updateData);
       return true;
     } catch (error) {
-      console.error('Error actualizando stats:', error);
+      console.error('Error updating stats:', error);
       return false;
     }
   }
 
   /**
-   * LEADERBOARD: Actualizar posición en leaderboard
+   * LEADERBOARD: Update leaderboard position
    */
   async updateLeaderboard(difficulty, time) {
     if (!this.userId || !this.nickname) return false;
@@ -325,7 +324,7 @@ class FirebaseService {
       const leaderboardRef = doc(this.db.firestore, `leaderboards/${difficulty}`, this.userId);
       const profile = await this.getUserProfile();
 
-      // Solo actualizar si es mejor tiempo o no existe
+      // Only update if better time or no entry exists
       const currentEntry = await this.getLeaderboardEntry(difficulty);
       if (!currentEntry || time < currentEntry.bestTime) {
         await setDoc(leaderboardRef, {
@@ -339,13 +338,13 @@ class FirebaseService {
 
       return true;
     } catch (error) {
-      console.error('Error actualizando leaderboard:', error);
+      console.error('Error updating leaderboard:', error);
       return false;
     }
   }
 
   /**
-   * LEADERBOARD: Obtener entrada del usuario en leaderboard
+   * LEADERBOARD: Get user's leaderboard entry
    */
   async getLeaderboardEntry(difficulty) {
     if (!this.userId) return null;
@@ -358,13 +357,13 @@ class FirebaseService {
 
       return entrySnap.exists() ? entrySnap.data() : null;
     } catch (error) {
-      console.error('Error obteniendo entrada leaderboard:', error);
+      console.error('Error getting leaderboard entry:', error);
       return null;
     }
   }
 
   /**
-   * LEADERBOARD: Obtener top 10 + usuario
+   * LEADERBOARD: Get top 10 + user
    * @param {string} difficulty - 'easy', 'medium', 'hard', 'expert'
    * @returns {object} { top10: [], userRank: number, userEntry: object }
    */
@@ -372,7 +371,7 @@ class FirebaseService {
     try {
       const { collection, query, orderBy, limit, getDocs, doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js');
 
-      // Obtener top 10
+      // Get top 10
       const q = query(
         collection(this.db.firestore, `leaderboards/${difficulty}`),
         orderBy('bestTime', 'asc'),
@@ -397,7 +396,7 @@ class FirebaseService {
         }
       });
 
-      // Si el usuario no está en top 10, obtener su posición
+      // If user is not in top 10, get their position
       if (!userEntry && this.userId) {
         const userEntryRef = doc(this.db.firestore, `leaderboards/${difficulty}`, this.userId);
         const userEntrySnap = await getDoc(userEntryRef);
@@ -405,7 +404,7 @@ class FirebaseService {
         if (userEntrySnap.exists()) {
           userEntry = userEntrySnap.data();
 
-          // Calcular posición real (solo para referencia)
+          // Calculate actual rank (for reference only)
           const allResults = await getDocs(
             query(
               collection(this.db.firestore, `leaderboards/${difficulty}`),
@@ -430,13 +429,13 @@ class FirebaseService {
         difficulty
       };
     } catch (error) {
-      console.error('Error obteniendo leaderboard:', error);
+      console.error('Error getting leaderboard:', error);
       return { top10: [], userRank: null, userEntry: null, difficulty };
     }
   }
 
   /**
-   * HISTORIAL: Obtener juegos del usuario
+   * HISTORY: Get user's games
    */
   async getUserGames(limit = 10) {
     if (!this.userId) return [];
@@ -464,13 +463,13 @@ class FirebaseService {
 
       return games;
     } catch (error) {
-      console.error('Error obteniendo historial:', error);
+      console.error('Error getting game history:', error);
       return [];
     }
   }
 
   /**
-   * JUEGO: Eliminar partida en progreso
+   * GAME: Delete in-progress game
    */
   async deleteGameState(gameId) {
     if (!this.userId) return false;
@@ -482,20 +481,20 @@ class FirebaseService {
       await remove(gameRef);
       return true;
     } catch (error) {
-      console.error('Error eliminando estado:', error);
+      console.error('Error deleting state:', error);
       return false;
     }
   }
 
   /**
-   * UTILITY: Generar ID de juego único
+   * UTILITY: Generate unique game ID
    */
   generateGameId() {
     return `game_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
   /**
-   * UTILITY: Obtener estado actual
+   * UTILITY: Get current auth state
    */
   getAuthState() {
     return {
@@ -506,29 +505,26 @@ class FirebaseService {
   }
 
   /**
-   * TESTING: Mock para Node.js
+   * TESTING: Mock for Node.js
    */
   initializeMock() {
     this.userId = 'mock_user_' + Math.random().toString(36).substr(2, 9);
     this.nickname = 'Player_MOCK';
-    console.log('⚠️  Mock mode - no real Firebase connection');
+    console.log('Mock mode - no real Firebase connection');
     return true;
   }
 
   /**
-   * TESTING: Simular resultado de juego
+   * TESTING: Simulate game result
    */
   async mockSaveResult(difficulty = 'easy', won = true, time = 245) {
     return {
       success: true,
-      message: 'Mock: resultado guardado',
+      message: 'Mock: result saved',
       gameId: this.generateGameId(),
       data: { difficulty, won, time }
     };
   }
 }
 
-// Exportar para Node.js
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = FirebaseService;
-}
+export default FirebaseService;

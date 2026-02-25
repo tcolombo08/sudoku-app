@@ -1,62 +1,62 @@
-# 🚀 Sudoku App - Quick Start Guide
+# Sudoku App - Quick Start Guide
 
-## 1️⃣ Primeros Pasos
+## 1. Getting Started
 
-### Clonar el repo
+### Clone the repo
 ```bash
-git clone https://github.com/tu-usuario/sudoku-app.git
+git clone https://github.com/your-username/sudoku-app.git
 cd sudoku-app
 ```
 
-### Instalar dependencias
+### Install dependencies
 ```bash
 npm install
 ```
 
-### Ejecutar tests (verificar que todo funciona)
+### Run tests (verify everything works)
 ```bash
 npm test
 ```
 
-Deberías ver:
+You should see:
 ```
-✅ Test generador Sudoku - PASS
-✅ Test lógica juego - PASS
-✅ Tests totales: 12/12 PASS
+Sudoku generator test - PASS
+Game logic test - PASS
+Total tests: 12/12 PASS
 ```
 
 ---
 
-## 2️⃣ Configurar Firebase
+## 2. Configure Firebase
 
-### Opción A: Setup automático
+### Option A: Automatic setup
 ```bash
 npm run setup
-# Sigue las instrucciones interactivas
+# Follow the interactive instructions
 ```
 
-### Opción B: Manual
-1. Renombra `firebase.config.template.js` → `firebase.config.js`
-2. Actualiza los valores con tus credenciales de Firebase
-3. Ver `docs/FIREBASE-SETUP.md` para instrucciones detalladas
+### Option B: Manual
+1. Rename `firebase.config.template.js` to `firebase.config.js`
+2. Update the values with your Firebase credentials
+3. See `docs/FIREBASE-SETUP.md` for detailed instructions
 
 ---
 
-## 3️⃣ Entender la estructura
+## 3. Understand the structure
 
-**Código lógico (sin UI):**
+**Logic code (no UI):**
 ```javascript
 // shared/sudokuGenerator.js
 const gen = new SudokuGenerator();
 const game = gen.generate('medium'); // {puzzle, solution}
 ```
 
-**Lógica del juego:**
+**Game logic:**
 ```javascript
 // shared/gameLogic.js
 const gameLogic = new GameLogic(puzzle, solution);
 gameLogic.setMode('complete');
-gameLogic.placeNumber(0, 0, 5); // validar número
+gameLogic.placeNumber(0, 0, 5); // validate number
 ```
 
 **Backend:**
@@ -69,27 +69,27 @@ await firebase.saveGameResult({...});
 
 ---
 
-## 4️⃣ Estructura del Proyecto
+## 4. Project Structure
 
 ```
 sudoku-app/
-├── shared/             ← Código compartido (Node.js puro)
+├── shared/             <- Shared code (pure Node.js)
 │   ├── sudokuGenerator.js
 │   ├── gameLogic.js
 │   ├── firebase.js
 │   └── test-*.js
-├── web/                ← React (próximo)
-├── mobile/             ← React Native (después)
-├── docs/               ← Documentación completa
-├── README.md           ← Overview
-└── PROGRESS.md         ← Estado detallado
+├── web/                <- React (next)
+├── mobile/             <- React Native (later)
+├── docs/               <- Full documentation
+├── README.md           <- Overview
+└── PROGRESS.md         <- Detailed status
 ```
 
 ---
 
-## 5️⃣ Próximos Pasos
+## 5. Next Steps
 
-### Para Web (React)
+### For Web (React)
 ```bash
 cd web
 npm create vite@latest . -- --template react
@@ -97,7 +97,7 @@ npm install
 npm run dev
 ```
 
-### Para Mobile (React Native)
+### For Mobile (React Native)
 ```bash
 cd mobile
 npx create-expo-app .
@@ -107,85 +107,85 @@ npm start
 
 ---
 
-## 📚 Documentación
+## Documentation
 
-**Para entender:**
-- `README.md` - Overview del proyecto
-- `ARCHITECTURE.md` - Diagramas y flujos
-- `docs/FIREBASE-SETUP.md` - Configurar Firebase
-- `docs/FIREBASE-API.md` - API completa
+**To understand:**
+- `README.md` - Project overview
+- `ARCHITECTURE.md` - Diagrams and flows
+- `docs/FIREBASE-SETUP.md` - Configure Firebase
+- `docs/FIREBASE-API.md` - Complete API reference
 
-**Para desarrollar:**
-- `shared/gameLogic.js` - Lógica del juego (leer)
-- `shared/firebase.js` - Backend (leer)
-- `PROGRESS.md` - Estado actual
+**To develop:**
+- `shared/gameLogic.js` - Game logic (read)
+- `shared/firebase.js` - Backend (read)
+- `PROGRESS.md` - Current status
 
 ---
 
-## 🧪 Testing
+## Testing
 
 ```bash
-# Tests de generador
+# Generator tests
 npm run test:sudoku
 
-# Tests de lógica
+# Logic tests
 npm run test:gamelogic
 
-# Todos los tests
+# All tests
 npm test
 ```
 
 ---
 
-## 🔥 Firebase Testing
+## Firebase Testing
 
-Sin credenciales reales:
+Without real credentials:
 ```javascript
 const firebase = new FirebaseService({});
 firebase.initializeMock();
 
-// Ahora puedes usar todos los métodos
+// Now you can use all methods
 const result = await firebase.mockSaveResult('easy', true, 245);
 ```
 
-Con credenciales:
+With credentials:
 ```javascript
 const firebase = new FirebaseService(firebaseConfig);
 await firebase.initialize();
 
-// Ahora conecta a Firebase real
+// Now connects to real Firebase
 ```
 
 ---
 
-## 📱 Desarrollo Local
+## Local Development
 
 ### Web
 ```bash
 cd web
 npm run dev
-# Abre http://localhost:5173
+# Open http://localhost:5173
 ```
 
-### Mobile (con Expo)
+### Mobile (with Expo)
 ```bash
 cd mobile
 npm start
-# Escanea QR con Expo Go app
+# Scan QR with Expo Go app
 ```
 
 ---
 
-## ⚙️ Configuración importante
+## Important Configuration
 
-### .gitignore (NO subir a GitHub)
+### .gitignore (DO NOT push to GitHub)
 ```
-firebase.config.js        ← Credenciales (PRIVADO)
-.env.local               ← Variables de ambiente
-node_modules/            ← Dependencias
+firebase.config.js        <- Credentials (PRIVATE)
+.env.local               <- Environment variables
+node_modules/            <- Dependencies
 ```
 
-### Commit inicial sugerido
+### Suggested initial commit
 ```bash
 git add .
 git commit -m "Initial commit: game logic + firebase backend
@@ -200,49 +200,49 @@ git push origin main
 
 ---
 
-## 🐛 Si algo no funciona
+## If something doesn't work
 
-1. **npm test falla**
-   - Verifica Node.js: `node --version` (debe ser ≥18)
-   - Reinstala: `rm -rf node_modules && npm install`
+1. **npm test fails**
+   - Check Node.js: `node --version` (must be >=18)
+   - Reinstall: `rm -rf node_modules && npm install`
 
-2. **Firebase no conecta**
-   - Verifica `firebase.config.js` existe
-   - Copia valores correctamente desde Firebase Console
-   - Revisa `docs/FIREBASE-SETUP.md`
+2. **Firebase won't connect**
+   - Check that `firebase.config.js` exists
+   - Copy values correctly from Firebase Console
+   - Check `docs/FIREBASE-SETUP.md`
 
-3. **Código antiguo o cached**
+3. **Old or cached code**
    - `npm cache clean --force`
-   - `git status` para ver cambios
+   - `git status` to see changes
 
 ---
 
-## 💡 Tips para desarrolladores
+## Tips for developers
 
-1. **Todos los métodos son async**
+1. **All methods are async**
    ```javascript
    const result = await firebase.saveGameResult({...});
    ```
 
-2. **GameLogic es stateful**
+2. **GameLogic is stateful**
    ```javascript
    const game = new GameLogic(puzzle, solution);
-   game.placeNumber(0, 0, 5); // modifica estado interno
+   game.placeNumber(0, 0, 5); // modifies internal state
    ```
 
-3. **Firebase se inicializa una sola vez**
+3. **Firebase initializes only once**
    ```javascript
-   // NO hacer esto:
+   // DON'T do this:
    await firebase.initialize();
-   await firebase.initialize(); // ❌ Error
+   await firebase.initialize(); // Error
 
-   // Hacer esto:
+   // Do this:
    if (!firebase.userId) {
      await firebase.initialize();
    }
    ```
 
-4. **Guardar estado cada 10 segundos**
+4. **Save state every 10 seconds**
    ```javascript
    if (moveCount % 10 === 0) {
      await firebase.saveGameState(gameId, game.getState());
@@ -251,42 +251,40 @@ git push origin main
 
 ---
 
-## 🎯 Roadmap
+## Roadmap
 
-- ✅ Backend logic (generador + game + firebase)
-- 🚀 Web frontend (React)
-- ⏳ Mobile app (React Native)
-- ⏳ Ads integration (AdMob)
-- ⏳ App Store / Play Store deployment
-
-**Tiempo estimado total:** 30-35 horas
+- Backend logic (generator + game + firebase) - DONE
+- Web frontend (React) - NEXT
+- Mobile app (React Native) - PLANNED
+- Ads integration (AdMob) - PLANNED
+- App Store / Play Store deployment - PLANNED
 
 ---
 
-## 📞 Desarrollo
+## Development
 
 **Stack:**
-- Backend: Node.js puro (zero dependencies)
+- Backend: Pure Node.js (zero dependencies)
 - Web: React 18 + Vite
 - Mobile: React Native + Expo
 - Database: Firebase (Firestore + Realtime)
 
-**Arquitectura:**
-- `shared/` - Lógica pura (reutilizable)
-- `web/` - UI React (browser)
-- `mobile/` - UI React Native (iOS/Android)
+**Architecture:**
+- `shared/` - Pure logic (reusable)
+- `web/` - React UI (browser)
+- `mobile/` - React Native UI (iOS/Android)
 
 ---
 
-**¿Listo para empezar?**
+**Ready to start?**
 
 ```bash
 npm test
-# Si ves ✅ TODOS LOS TESTS PASANDO, estás listo!
+# If you see ALL TESTS PASSING, you're ready!
 ```
 
-Luego: `npm run dev:web` para iniciar frontend.
+Then: `npm run dev:web` to start the frontend.
 
 ---
 
-**Made with ❤️ | Sudoku App v1.0**
+**Made with love | Sudoku App v1.0**

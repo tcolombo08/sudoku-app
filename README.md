@@ -1,51 +1,51 @@
-# 🎮 Sudoku App - Proyecto Completo
+# Sudoku App - Complete Project
 
-**Estado del Proyecto:** En desarrollo  
-**Última actualización:** 25/02/2026  
-**Progreso:** Fase 1 (Backend Lógica) ✅ | Fase 2 (Firebase) 🚀 | Fase 3 (UI Web) ⏳ | Fase 4 (React Native) ⏳
-
----
-
-## 📋 Especificaciones
-
-### Características principales
-- ✅ Generador de Sudokus (4 niveles: Easy, Medium, Hard, Expert)
-- ✅ Lógica del juego completa (validación, notas, vidas, temporizador)
-- ⏳ Sistema de autenticación (Firebase)
-- ⏳ Guardar progreso y estadísticas
-- ⏳ Leaderboard global
-- ⏳ Interfaz Web (React)
-- ⏳ Aplicación Mobile (React Native)
-
-### Monetización
-- Premium: Sin ads (AdMob integrado)
-- Ads: Videos cortos después de completar, videos largos para vidas extra
-- Sonidos: Click (correcto), Buzz (incorrecto) + vibración
+**Project Status:** In development
+**Last Updated:** 2026-02-25
+**Progress:** Phase 1 (Backend Logic) DONE | Phase 2 (Firebase) DONE | Phase 3 (Web UI) Pending | Phase 4 (React Native) Pending
 
 ---
 
-## 📁 Estructura del Proyecto
+## Specifications
+
+### Main Features
+- Sudoku generator (4 levels: Easy, Medium, Hard, Expert)
+- Full game logic (validation, notes, lives, timer)
+- Authentication system (Firebase)
+- Save progress and statistics
+- Global leaderboard
+- Web interface (React)
+- Mobile app (React Native)
+
+### Monetization
+- Premium: No ads (AdMob integrated)
+- Ads: Short videos after completing, long videos for extra lives
+- Sounds: Click (correct), Buzz (incorrect) + vibration
+
+---
+
+## Project Structure
 
 ```
 sudoku-app/
-├── shared/                    # 🔧 Lógica compartida (Node.js puro)
-│   ├── sudokuGenerator.js     # ✅ Generador de puzzles
-│   ├── gameLogic.js           # ✅ Lógica del juego
-│   ├── firebase.js            # 🚀 Integración Firebase (EN DESARROLLO)
-│   ├── test-sudoku.js         # ✅ Tests del generador
-│   └── test-gamelogic.js      # ✅ Tests de lógica
+├── shared/                    # Shared logic (pure Node.js)
+│   ├── sudokuGenerator.js     # Puzzle generator
+│   ├── gameLogic.js           # Game logic
+│   ├── firebase.js            # Firebase integration
+│   ├── test-sudoku.js         # Generator tests
+│   └── test-gamelogic.js      # Logic tests
 │
-├── web/                       # 💻 Frontend Web (React)
+├── web/                       # Web Frontend (React)
 │   ├── src/
-│   │   ├── components/        # Componentes React
-│   │   ├── pages/             # Páginas principales
+│   │   ├── components/        # React components
+│   │   ├── pages/             # Main pages
 │   │   ├── styles/            # CSS/Tailwind
 │   │   ├── hooks/             # Custom hooks
 │   │   └── App.jsx
 │   ├── package.json
 │   └── vite.config.js
 │
-├── mobile/                    # 📱 React Native
+├── mobile/                    # React Native
 │   ├── src/
 │   │   ├── components/
 │   │   ├── screens/
@@ -54,69 +54,69 @@ sudoku-app/
 │   ├── package.json
 │   └── app.json
 │
-├── docs/                      # 📚 Documentación
-│   ├── ARCHITECTURE.md        # Arquitectura técnica
-│   ├── API.md                 # APIs internas
-│   └── FIREBASE-SETUP.md      # Guía Firebase
+├── docs/                      # Documentation
+│   ├── ARCHITECTURE.md        # Technical architecture
+│   ├── API.md                 # Internal APIs
+│   └── FIREBASE-SETUP.md      # Firebase guide
 │
-└── README.md                  # Este archivo
+└── README.md                  # This file
 ```
 
 ---
 
-## 🚀 Fases de Desarrollo
+## Development Phases
 
-### ✅ Fase 1: Lógica del Juego (COMPLETADA)
+### Phase 1: Game Logic (COMPLETED)
 
-**Archivos generados:**
-- `sudokuGenerator.js` - Generador de puzzles válidos
-- `gameLogic.js` - Lógica de juego completa
+**Generated files:**
+- `sudokuGenerator.js` - Valid puzzle generator
+- `gameLogic.js` - Complete game logic
 
-**Qué hace:**
+**What it does:**
 ```javascript
 const generator = new SudokuGenerator();
 const game_data = generator.generate('medium'); // puzzle + solution
 
 const game = new GameLogic(game_data.puzzle, game_data.solution);
-game.setMode('annotation'); // modo borrador
-game.placeNumber(0, 0, 5);  // agregar anotación
-game.setMode('complete');   // modo validación
-game.placeNumber(0, 0, 5);  // validar contra solución
+game.setMode('annotation'); // draft mode
+game.placeNumber(0, 0, 5);  // add annotation
+game.setMode('complete');   // validation mode
+game.placeNumber(0, 0, 5);  // validate against solution
 ```
 
 **Tests:**
-- Generar Sudokus de 4 niveles ✓
-- Validar soluciones ✓
-- Sistema de vidas ✓
-- Undo/Redo ✓
-- Temporizador ✓
-- Hints ✓
+- Generate Sudokus at 4 levels
+- Validate solutions
+- Lives system
+- Undo/Redo
+- Timer
+- Hints
 
 ---
 
-### 🚀 Fase 2: Backend Firebase (EN PROGRESO)
+### Phase 2: Firebase Backend (COMPLETED)
 
-**Lo que viene:**
-- Autenticación anónima
-- Guardar partidas en progreso
-- Guardar estadísticas por usuario
-- Leaderboard global
-- Perfil de usuario (nickname)
+**What's included:**
+- Anonymous authentication
+- Save in-progress games
+- Save per-user statistics
+- Global leaderboard
+- User profile (nickname)
 
-**Archivo a crear:**
-- `firebase.js` - Integración con Firestore + Realtime DB
+**File:**
+- `firebase.js` - Integration with Firestore + Realtime DB
 
 ---
 
-### ⏳ Fase 3: Frontend Web (PRÓXIMO)
+### Phase 3: Web Frontend (NEXT)
 
 **Stack:**
 - React 18
 - Vite
 - Tailwind CSS
-- React Query (manejo de estado)
+- React Query (state management)
 
-**Componentes:**
+**Components:**
 - Game Board (9x9 grid)
 - Number Pad
 - Stats Panel
@@ -125,7 +125,7 @@ game.placeNumber(0, 0, 5);  // validar contra solución
 
 ---
 
-### ⏳ Fase 4: React Native (DESPUÉS)
+### Phase 4: React Native (LATER)
 
 **Stack:**
 - React Native
@@ -136,30 +136,31 @@ game.placeNumber(0, 0, 5);  // validar contra solución
 
 ---
 
-## 🧪 Cómo ejecutar tests
+## How to Run Tests
 
 ```bash
-cd shared/
+# All tests
+npm test
 
-# Test generador
-node test-sudoku.js
+# Generator test
+npm run test:sudoku
 
-# Test lógica
-node test-gamelogic.js
+# Logic test
+npm run test:gamelogic
 ```
 
 ---
 
-## 📊 Estadísticas Generadas
+## Generated Statistics
 
-Cada juego guarda:
+Each game saves:
 ```javascript
 {
-  won: boolean,           // ¿Ganó?
-  time: number,           // Segundos
-  mistakes: number,       // Errores cometidos
-  hints: number,          // Hints usados
-  totalMoves: number,     // Total de movimientos
+  won: boolean,           // Did the player win?
+  time: number,           // Seconds
+  mistakes: number,       // Mistakes made
+  hints: number,          // Hints used
+  totalMoves: number,     // Total moves
   difficulty: string      // easy/medium/hard/expert
 }
 ```
@@ -169,7 +170,7 @@ Leaderboard:
 {
   rank: number,
   nickname: string,
-  bestTime: number,       // Por dificultad
+  bestTime: number,       // Per difficulty
   gamesWon: number,
   totalGames: number,
   winRate: number         // %
@@ -178,63 +179,63 @@ Leaderboard:
 
 ---
 
-## 🎯 Próximos pasos
+## Next Steps
 
 1. **Firebase Setup** (firebase.js)
-   - Crear proyecto Firebase
+   - Create Firebase project
    - Firestore schema
-   - Auth anónima
-   
+   - Anonymous auth
+
 2. **Web UI** (React)
    - GameBoard component
-   - Integración con GameLogic
+   - Integration with GameLogic
    - Stats dashboard
-   
+
 3. **Mobile Build** (React Native)
-   - Port del código web
-   - Sonidos + vibración
+   - Port from web code
+   - Sounds + vibration
    - AdMob integration
 
 4. **Testing & Deployment**
-   - Publicar en App Store
-   - Publicar en Google Play
+   - Publish to App Store
+   - Publish to Google Play
 
 ---
 
-## 📝 Notas Importantes
+## Important Notes
 
-### Sobre la lógica
-- El generador usa backtracking (garantiza solución única)
-- GameLogic es agnóstica a la UI (puro JS)
-- Funciona en Node.js y navegador
-- Sin dependencias externas
+### About the logic
+- The generator uses backtracking (guarantees unique solution)
+- GameLogic is UI-agnostic (pure JS)
+- Works in Node.js and browsers
+- No external dependencies
 
-### Sobre monetización
-- Premium desactiva todos los ads
-- Videos de 30s+ para vidas extra
-- Video corto (5-10s) después de completar
-- Leaderboard incentiva jugar más
+### About monetization
+- Premium disables all ads
+- 30s+ videos for extra lives
+- Short video (5-10s) after completing
+- Leaderboard incentivizes more play
 
-### Sobre performance
-- Grid 9x9 = operaciones O(1) a O(9)
-- Validación incremental (no recalcula todo)
-- Historial limitado (max 100 estados)
-
----
-
-## 🔐 Firebase Credentials
-
-**Pendiente:** Configurar en `firebase.js` cuando creemos la cuenta.
+### About performance
+- 9x9 grid = O(1) to O(9) operations
+- Incremental validation (doesn't recalculate everything)
+- Limited history (max 100 states)
 
 ---
 
-## 📞 Contacto / Issues
+## Firebase Credentials
 
-Para reportar bugs o sugerencias, menciona:
-- Qué archivo afecta
-- Pasos para reproducir
-- Resultado esperado vs actual
+**Pending:** Configure in `firebase.js` when the account is created.
 
 ---
 
-**Made with ❤️ | Sudoku App v1.0**
+## Contact / Issues
+
+To report bugs or suggestions, mention:
+- Which file is affected
+- Steps to reproduce
+- Expected vs actual result
+
+---
+
+**Made with love | Sudoku App v1.0**

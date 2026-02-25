@@ -1,0 +1,90 @@
+# ============================================
+# .claudeignore - Sudoku App
+# Aggressive: exclude everything that isn't relevant source code
+# ============================================
+
+# Dependencies (NEVER read node_modules)
+node_modules/
+**/node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+.pnp.*
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+.cache/
+.parcel-cache/
+.eslintcache
+*.tsbuildinfo
+
+# Mobile native (auto-generated)
+android/
+ios/
+*.jks
+*.keystore
+*.p12
+*.mobileprovision
+
+# Firebase emulators and cache
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+database-debug.log
+
+# Coverage and testing artifacts
+coverage/
+*.lcov
+.nyc_output/
+__snapshots__/
+
+# IDE and editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# Temp
+*.tmp
+temp/
+.tmp/
+
+# Heavy assets (images, fonts, audio)
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.ico
+*.svg
+*.woff
+*.woff2
+*.ttf
+*.eot
+*.mp3
+*.wav
+*.ogg
+
+# Env and secrets
+.env*
+firebase.config.js
+**/firebase.config.js
+
+# Generated documentation
+docs/FIREBASE-SETUP.md
+docs/FIREBASE-API.md

@@ -1,96 +1,96 @@
-# 🔥 Firebase Setup Guide
+# Firebase Setup Guide
 
-## Pasos rápidos (5 min)
+## Quick Steps (5 min)
 
-### 1. Crear proyecto Firebase
+### 1. Create Firebase project
 
-1. Ve a [firebase.google.com](https://firebase.google.com)
-2. Click en "Get Started" → "Create project"
-3. Nombre: `sudoku-app` (o el que prefieras)
-4. Desactiva Google Analytics (opcional)
+1. Go to [firebase.google.com](https://firebase.google.com)
+2. Click "Get Started" -> "Create project"
+3. Name: `sudoku-app` (or whatever you prefer)
+4. Disable Google Analytics (optional)
 5. Click "Create project"
 
-### 2. Configurar Autenticación
+### 2. Configure Authentication
 
-1. En Firebase Console → **Authentication**
-2. Click en "Get started"
-3. En "Sign-in method" → habilita **Anonymous**
-4. Click "Enable" y "Save"
+1. In Firebase Console -> **Authentication**
+2. Click "Get started"
+3. In "Sign-in method" -> enable **Anonymous**
+4. Click "Enable" and "Save"
 
-### 3. Crear Firestore Database
+### 3. Create Firestore Database
 
-1. Firebase Console → **Firestore Database**
+1. Firebase Console -> **Firestore Database**
 2. Click "Create database"
-3. Ubicación: `us-central1` (o la más cercana)
-4. Modo: **Start in test mode** (cambiar después)
+3. Location: `us-central1` (or closest to you)
+4. Mode: **Start in test mode** (change later)
 5. Click "Create"
 
-### 4. Crear Realtime Database
+### 4. Create Realtime Database
 
-1. Firebase Console → **Realtime Database**
+1. Firebase Console -> **Realtime Database**
 2. Click "Create database"
-3. Ubicación: `us-central1`
-4. Modo: **Start in test mode**
+3. Location: `us-central1`
+4. Mode: **Start in test mode**
 5. Click "Create"
 
-### 5. Obtener credenciales
+### 5. Get credentials
 
-1. Firebase Console → Project Settings (rueda ⚙️ arriba a la izquierda)
+1. Firebase Console -> Project Settings (gear icon, top left)
 2. Tab "General"
-3. Busca "Your apps" 
-4. Si no hay apps, click "Add app" → Web (</>)
-5. Nombre: `sudoku-web`
-6. Copia el objeto firebaseConfig
+3. Find "Your apps"
+4. If no apps exist, click "Add app" -> Web (</>)
+5. Name: `sudoku-web`
+6. Copy the firebaseConfig object
 
-### 6. Configurar proyecto local
+### 6. Configure local project
 
 ```bash
-# En la raíz del proyecto
+# In the project root
 npm run setup
 
-# Te pedirá los valores de Firebase
-# O renombra y edita manualmente:
+# It will ask for Firebase values
+# Or rename and edit manually:
 cp firebase.config.template.js firebase.config.js
 ```
 
 ---
 
-## Firestore Rules (Seguridad)
+## Firestore Rules (Security)
 
-Copia esto en **Firestore → Rules**:
+Copy this in **Firestore -> Rules**:
 
 ```javascript
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Usuarios: solo lectura/escritura propia
+
+    // Users: only read/write own data
     match /users/{userId} {
       allow read, write: if request.auth.uid == userId;
     }
 
-    // Juegos: solo propietario puede leer/escribir
+    // Games: only owner can read/write
     match /games/{gameId} {
       allow create: if request.auth.uid != null;
       allow read, update, delete: if request.auth.uid == resource.data.userId;
     }
 
-    // Leaderboards: públicos para lectura
+    // Leaderboards: public read
     match /leaderboards/{difficulty}/{userId} {
       allow read: if true;
-      allow write: if false; // Solo backend
+      allow write: if false; // Backend only
     }
   }
 }
 ```
 
-Click "Publish" cuando termines.
+Click "Publish" when done.
 
 ---
 
 ## Realtime Database Rules
 
-Ve a **Realtime Database → Rules** y reemplaza con:
+Go to **Realtime Database -> Rules** and replace with:
 
 ```json
 {
@@ -112,7 +112,7 @@ Click "Publish".
 
 ---
 
-## Estructura de datos esperada
+## Expected Data Structure
 
 ### Firestore
 
@@ -183,23 +183,23 @@ games_progress/
 
 ---
 
-## Usar Firebase en tu código
+## Using Firebase in your code
 
-### En React (Web)
+### In React (Web)
 
 ```javascript
 import FirebaseService from '../shared/firebase.js';
 import firebaseConfig from '../firebase.config.js';
 
-// Inicializar (una sola vez en App.jsx)
+// Initialize (once in App.jsx)
 useEffect(() => {
   const firebase = new FirebaseService(firebaseConfig);
   await firebase.initialize();
-  
-  // Guardar en estado global (zustand o context)
+
+  // Store in global state (zustand or context)
 }, []);
 
-// Usar en componentes
+// Use in components
 const handleSaveGame = async () => {
   const result = await firebase.saveGameResult({
     gameId: gameId,
@@ -210,42 +210,42 @@ const handleSaveGame = async () => {
     hints: 0,
     totalMoves: 81
   });
-  
+
   if (result.success) {
     console.log('Game saved!');
   }
 };
 ```
 
-### En React Native (Mobile)
+### In React Native (Mobile)
 
 ```javascript
 import FirebaseService from '../shared/firebase.js';
 import firebaseConfig from '../firebase.config.js';
 
-// En App.tsx o main index
+// In App.tsx or main index
 useEffect(() => {
   const setupFirebase = async () => {
     const firebase = new FirebaseService(firebaseConfig);
     await firebase.initialize();
     setFirebaseService(firebase);
   };
-  
+
   setupFirebase();
 }, []);
 ```
 
 ---
 
-## Testing sin Firebase
+## Testing without Firebase
 
-Para testing/desarrollo sin credenciales reales:
+For testing/development without real credentials:
 
 ```javascript
 const firebase = new FirebaseService({});
 firebase.initializeMock();
 
-// Usa métodos como normalmente
+// Use methods as normal
 const result = await firebase.mockSaveResult('easy', true, 245);
 ```
 
@@ -254,53 +254,53 @@ const result = await firebase.mockSaveResult('easy', true, 245);
 ## Troubleshooting
 
 ### Error: "Firebase app already initialized"
-- No llames `initialize()` más de una vez
-- Usa un singleton o context global
+- Don't call `initialize()` more than once
+- Use a singleton or global context
 
-### Error: "Permission denied" en Firestore
-- Verifica que las reglas de seguridad estén correctas
-- Asegúrate de estar autenticado (`request.auth.uid != null`)
+### Error: "Permission denied" in Firestore
+- Check that security rules are correct
+- Make sure you're authenticated (`request.auth.uid != null`)
 
-### Error: "CORS policy" en navegador
-- Asegúrate de que el dominio está autorizado
-- Firebase Console → Authentication → Authorized domains
+### Error: "CORS policy" in browser
+- Make sure the domain is authorized
+- Firebase Console -> Authentication -> Authorized domains
 
-### Leaderboard muy lento
-- Crea un índice en Firestore
-- Firestore → Indexes → Create index
+### Leaderboard too slow
+- Create an index in Firestore
+- Firestore -> Indexes -> Create index
 - Collection: `leaderboards/{difficulty}`
 - Fields: `bestTime (Ascending)`
 
 ---
 
-## Costo de Firebase
+## Firebase Costs
 
-**Plan Gratis es suficiente para empezar:**
+**Free plan is enough to start:**
 
-- 1 GB almacenamiento Firestore
+- 1 GB Firestore storage
 - 10 GB Realtime Database
-- 50,000 lecturas/día
-- 20,000 escrituras/día
-- 20,000 deletes/día
+- 50,000 reads/day
+- 20,000 writes/day
+- 20,000 deletes/day
 
-**Costo se activa si superas. Para monetizar después:**
-- Pagas solo por lo que usas
-- Primeros $5-10 al mes típicamente gratis
-
----
-
-## Próximos pasos
-
-1. ✅ Crear proyecto Firebase
-2. ✅ Configurar Autenticación
-3. ✅ Crear Firestore + Realtime DB
-4. ✅ Agregar Firebase Rules
-5. ⏳ Crear Web frontend (React)
-6. ⏳ Crear Mobile app (React Native)
+**Costs activate if you exceed limits. For monetization later:**
+- Pay only for what you use
+- First $5-10 per month typically free
 
 ---
 
-**¿Dudas?** Revisa:
+## Next steps
+
+1. Create Firebase project
+2. Configure Authentication
+3. Create Firestore + Realtime DB
+4. Add Firebase Rules
+5. Create Web frontend (React)
+6. Create Mobile app (React Native)
+
+---
+
+**Questions?** Check:
 - [Firebase Docs](https://firebase.google.com/docs)
 - [Firestore Beginner Guide](https://firebase.google.com/docs/firestore/quickstart)
-- Código en `shared/firebase.js` (tiene comentarios)
+- Code in `shared/firebase.js` (has comments)
