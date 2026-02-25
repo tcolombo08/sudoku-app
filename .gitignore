@@ -1,0 +1,59 @@
+# Dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Firebase config (IMPORTANTE: no commitear credenciales reales)
+web/src/config/firebase.config.js
+mobile/src/config/firebase.config.js
+firebase-config.template.js
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS
+Thumbs.db
+.DS_Store
+
+# React
+.eslintcache
+.parcel-cache
+.cache
+
+# React Native
+android/
+ios/
+*.jks
+*.keystore
+
+# Tests
+coverage/
+*.lcov
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+*.tmp
+temp/
+.tmp/
+
+# Local development
+.wds.json

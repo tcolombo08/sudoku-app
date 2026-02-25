@@ -1,0 +1,41 @@
+{
+  "name": "sudoku-app",
+  "version": "1.0.0",
+  "description": "Sudoku game app with ads, premium, and leaderboards",
+  "main": "shared/gameLogic.js",
+  "type": "module",
+  "scripts": {
+    "test": "node shared/test-sudoku.js && node shared/test-gamelogic.js",
+    "test:sudoku": "node shared/test-sudoku.js",
+    "test:gamelogic": "node shared/test-gamelogic.js",
+    "dev:web": "cd web && npm run dev",
+    "dev:mobile": "cd mobile && npm start",
+    "build:web": "cd web && npm run build",
+    "build:mobile": "cd mobile && npm run build",
+    "setup": "node scripts/setup.js",
+    "lint": "eslint shared/**/*.js web/src/**/*.jsx mobile/src/**/*.tsx"
+  },
+  "keywords": [
+    "sudoku",
+    "game",
+    "react",
+    "react-native",
+    "firebase",
+    "mobile"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^8.0.0"
+  },
+  "dependencies": {
+    "firebase": "^10.7.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tu-usuario/sudoku-app.git"
+  }
+}
