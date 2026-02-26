@@ -17,7 +17,7 @@ class SudokuGenerator {
       easy: { min: 30, max: 40 },      // 40-50 visible numbers
       medium: { min: 40, max: 50 },    // 30-40 visible numbers
       hard: { min: 50, max: 60 },      // 20-30 visible numbers
-      expert: { min: 60, max: 70 }     // 10-20 visible numbers
+      expert: { min: 50, max: 58 }     // 23-31 visible numbers
     };
   }
 

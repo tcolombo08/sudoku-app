@@ -242,28 +242,84 @@ class GameLogic {
   }
 
   /**
-   * HINT: get a number from the solution (no life penalty)
+   * Calculate candidate numbers for a cell based on current board state.
+   * Returns array of valid numbers (1-9) that don't conflict with row/col/box.
    */
-  getHint(row, col) {
-    if (!this.isValidCoordinate(row, col)) {
-      return { success: false, message: 'Invalid coordinate' };
-    }
+  getCandidates(row, col) {
+    if (this.board[row][col] !== this.EMPTY) return [];
 
-    if (this.puzzle[row][col] !== this.EMPTY) {
-      return { success: false, message: 'This cell is fixed' };
+    const candidates = [];
+    for (let num = 1; num <= this.GRID_SIZE; num++) {
+      if (!this.hasConflict(row, col, num)) {
+        candidates.push(num);
+      }
     }
+    return candidates;
+  }
 
-    if (this.board[row][col] !== this.EMPTY) {
-      return { success: false, message: 'This cell is already filled' };
-    }
-
-    const hint = this.solution[row][col];
+  /**
+   * HINT: smart hint system (no life penalty)
+   * 1. Finds a cell solvable by naked single (only 1 candidate) and fills it.
+   * 2. If none found, fills notes on ALL empty cells with their candidates.
+   */
+  getHint() {
     this.stats.hintsUsed++;
+    this.saveToHistory();
+
+    // Pass 1: find a naked single (cell with exactly 1 candidate)
+    for (let r = 0; r < this.GRID_SIZE; r++) {
+      for (let c = 0; c < this.GRID_SIZE; c++) {
+        if (this.board[r][c] !== this.EMPTY) continue;
+
+        const candidates = this.getCandidates(r, c);
+        if (candidates.length === 1) {
+          const num = candidates[0];
+          this.board[r][c] = num;
+          this.notes[r][c] = [];
+          this.stats.movementsTotal++;
+
+          if (this.isSolved()) {
+            this.endGame(true);
+            return {
+              success: true,
+              type: 'solve',
+              row: r,
+              col: c,
+              hint: num,
+              message: 'Solved!',
+              isWon: true
+            };
+          }
+
+          return {
+            success: true,
+            type: 'solve',
+            row: r,
+            col: c,
+            hint: num,
+            message: `Filled ${num} at row ${r + 1}, col ${c + 1}`
+          };
+        }
+      }
+    }
+
+    // Pass 2: no naked single found, fill notes for all empty cells
+    let cellsFilled = 0;
+    for (let r = 0; r < this.GRID_SIZE; r++) {
+      for (let c = 0; c < this.GRID_SIZE; c++) {
+        if (this.board[r][c] !== this.EMPTY) continue;
+
+        const candidates = this.getCandidates(r, c);
+        this.notes[r][c] = candidates;
+        cellsFilled++;
+      }
+    }
 
     return {
       success: true,
-      hint,
-      message: `Hint: ${hint}`
+      type: 'notes',
+      cellsFilled,
+      message: `Notes filled for ${cellsFilled} cells`
     };
   }
 
