@@ -139,6 +139,7 @@ class GameLogic {
     if (isCorrect) {
       this.board[row][col] = num;
       this.notes[row][col] = [];
+      this.clearNotesForPlacement(row, col, num);
       this.stats.movementsTotal++;
 
       // Check if won
@@ -242,6 +243,34 @@ class GameLogic {
   }
 
   /**
+   * Remove a number from notes in the same row, column, and 3x3 box.
+   * Called when a number is correctly placed on the board.
+   */
+  clearNotesForPlacement(row, col, num) {
+    // Clear from row
+    for (let c = 0; c < this.GRID_SIZE; c++) {
+      const idx = this.notes[row][c].indexOf(num);
+      if (idx > -1) this.notes[row][c].splice(idx, 1);
+    }
+
+    // Clear from column
+    for (let r = 0; r < this.GRID_SIZE; r++) {
+      const idx = this.notes[r][col].indexOf(num);
+      if (idx > -1) this.notes[r][col].splice(idx, 1);
+    }
+
+    // Clear from 3x3 box
+    const boxRow = Math.floor(row / this.SUBGRID_SIZE) * this.SUBGRID_SIZE;
+    const boxCol = Math.floor(col / this.SUBGRID_SIZE) * this.SUBGRID_SIZE;
+    for (let r = boxRow; r < boxRow + this.SUBGRID_SIZE; r++) {
+      for (let c = boxCol; c < boxCol + this.SUBGRID_SIZE; c++) {
+        const idx = this.notes[r][c].indexOf(num);
+        if (idx > -1) this.notes[r][c].splice(idx, 1);
+      }
+    }
+  }
+
+  /**
    * Calculate candidate numbers for a cell based on current board state.
    * Returns array of valid numbers (1-9) that don't conflict with row/col/box.
    */
@@ -276,6 +305,7 @@ class GameLogic {
           const num = candidates[0];
           this.board[r][c] = num;
           this.notes[r][c] = [];
+          this.clearNotesForPlacement(r, c, num);
           this.stats.movementsTotal++;
 
           if (this.isSolved()) {
