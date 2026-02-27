@@ -1,0 +1,110 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #0ea5e9;
+  --color-primary-light: #38bdf8;
+  --color-primary-dark: #0284c7;
+  --color-accent: #f472b6;
+  --color-accent-light: #f9a8d4;
+  --color-accent-dark: #db2777;
+  --color-mint: #34d399;
+  --color-mint-dark: #059669;
+  --color-lavender: #a78bfa;
+  --color-lavender-dark: #7c3aed;
+  --color-peach: #fb923c;
+  --color-peach-dark: #ea580c;
+  --color-danger: #f43f5e;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-board-bg: #f0f9ff;
+  --color-cell-given: #0f172a;
+  --color-cell-user: #0ea5e9;
+  --color-cell-error: #f43f5e;
+  --color-cell-selected: #bae6fd;
+  --color-cell-highlight: #e0f2fe;
+  --color-cell-conflict: #ffe4e6;
+  --color-cell-same: #ddd6fe;
+  --color-annotation: #64748b;
+  --color-border-thick: #475569;
+  --color-border-thin: #cbd5e1;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #f8fafc;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Error flash overlay */
+@keyframes errorFlash {
+  0% { opacity: 0; }
+  15% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.error-flash {
+  animation: errorFlash 0.6s ease-out forwards;
+}
+
+/* Cell pop animation */
+@keyframes cellPop {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.cell-pop {
+  animation: cellPop 0.3s ease-out;
+}
+
+/* Shake animation for wrong answer */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(-6px); }
+  30% { transform: translateX(6px); }
+  45% { transform: translateX(-4px); }
+  60% { transform: translateX(4px); }
+  75% { transform: translateX(-2px); }
+  90% { transform: translateX(2px); }
+}
+.shake {
+  animation: shake 0.5s ease-out;
+}
+
+/* Confetti burst for win */
+@keyframes confettiFall {
+  0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* Slide up for game over */
+@keyframes slideUp {
+  0% { transform: translateY(100%); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+.slide-up {
+  animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Pulse glow */
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(14, 165, 233, 0); }
+}
+.pulse-glow {
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+/* Number pad bounce */
+@keyframes btnPress {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.88); }
+  100% { transform: scale(1); }
+}
+.btn-press {
+  animation: btnPress 0.15s ease-out;
+}

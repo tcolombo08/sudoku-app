@@ -139,6 +139,7 @@ class GameLogic {
     if (isCorrect) {
       this.board[row][col] = num;
       this.notes[row][col] = [];
+      this.clearNotesForPlacement(row, col, num);
       this.stats.movementsTotal++;
 
       // Check if won
@@ -242,28 +243,113 @@ class GameLogic {
   }
 
   /**
-   * HINT: get a number from the solution (no life penalty)
+   * Remove a number from notes in the same row, column, and 3x3 box.
+   * Called when a number is correctly placed on the board.
    */
-  getHint(row, col) {
-    if (!this.isValidCoordinate(row, col)) {
-      return { success: false, message: 'Invalid coordinate' };
+  clearNotesForPlacement(row, col, num) {
+    // Clear from row
+    for (let c = 0; c < this.GRID_SIZE; c++) {
+      const idx = this.notes[row][c].indexOf(num);
+      if (idx > -1) this.notes[row][c].splice(idx, 1);
     }
 
-    if (this.puzzle[row][col] !== this.EMPTY) {
-      return { success: false, message: 'This cell is fixed' };
+    // Clear from column
+    for (let r = 0; r < this.GRID_SIZE; r++) {
+      const idx = this.notes[r][col].indexOf(num);
+      if (idx > -1) this.notes[r][col].splice(idx, 1);
     }
 
-    if (this.board[row][col] !== this.EMPTY) {
-      return { success: false, message: 'This cell is already filled' };
+    // Clear from 3x3 box
+    const boxRow = Math.floor(row / this.SUBGRID_SIZE) * this.SUBGRID_SIZE;
+    const boxCol = Math.floor(col / this.SUBGRID_SIZE) * this.SUBGRID_SIZE;
+    for (let r = boxRow; r < boxRow + this.SUBGRID_SIZE; r++) {
+      for (let c = boxCol; c < boxCol + this.SUBGRID_SIZE; c++) {
+        const idx = this.notes[r][c].indexOf(num);
+        if (idx > -1) this.notes[r][c].splice(idx, 1);
+      }
     }
+  }
 
-    const hint = this.solution[row][col];
+  /**
+   * Calculate candidate numbers for a cell based on current board state.
+   * Returns array of valid numbers (1-9) that don't conflict with row/col/box.
+   */
+  getCandidates(row, col) {
+    if (this.board[row][col] !== this.EMPTY) return [];
+
+    const candidates = [];
+    for (let num = 1; num <= this.GRID_SIZE; num++) {
+      if (!this.hasConflict(row, col, num)) {
+        candidates.push(num);
+      }
+    }
+    return candidates;
+  }
+
+  /**
+   * HINT: smart hint system (no life penalty)
+   * 1. Finds a cell solvable by naked single (only 1 candidate) and fills it.
+   * 2. If none found, fills notes on ALL empty cells with their candidates.
+   */
+  getHint() {
     this.stats.hintsUsed++;
+    this.saveToHistory();
+
+    // Pass 1: find a naked single (cell with exactly 1 candidate)
+    for (let r = 0; r < this.GRID_SIZE; r++) {
+      for (let c = 0; c < this.GRID_SIZE; c++) {
+        if (this.board[r][c] !== this.EMPTY) continue;
+
+        const candidates = this.getCandidates(r, c);
+        if (candidates.length === 1) {
+          const num = candidates[0];
+          this.board[r][c] = num;
+          this.notes[r][c] = [];
+          this.clearNotesForPlacement(r, c, num);
+          this.stats.movementsTotal++;
+
+          if (this.isSolved()) {
+            this.endGame(true);
+            return {
+              success: true,
+              type: 'solve',
+              row: r,
+              col: c,
+              hint: num,
+              message: 'Solved!',
+              isWon: true
+            };
+          }
+
+          return {
+            success: true,
+            type: 'solve',
+            row: r,
+            col: c,
+            hint: num,
+            message: `Filled ${num} at row ${r + 1}, col ${c + 1}`
+          };
+        }
+      }
+    }
+
+    // Pass 2: no naked single found, fill notes for all empty cells
+    let cellsFilled = 0;
+    for (let r = 0; r < this.GRID_SIZE; r++) {
+      for (let c = 0; c < this.GRID_SIZE; c++) {
+        if (this.board[r][c] !== this.EMPTY) continue;
+
+        const candidates = this.getCandidates(r, c);
+        this.notes[r][c] = candidates;
+        cellsFilled++;
+      }
+    }
 
     return {
       success: true,
-      hint,
-      message: `Hint: ${hint}`
+      type: 'notes',
+      cellsFilled,
+      message: `Notes filled for ${cellsFilled} cells`
     };
   }
 

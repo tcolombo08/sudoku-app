@@ -55,6 +55,8 @@ class FirebaseService {
    * Anonymous authentication setup
    */
   async setupAuth() {
+    const { onAuthStateChanged, signInAnonymously } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js');
+
     return new Promise((resolve) => {
       if (!this.auth) {
         resolve(false);
@@ -62,7 +64,6 @@ class FirebaseService {
       }
 
       // Listen for auth state changes
-      const { onAuthStateChanged, signInAnonymously } = await import('firebase/auth');
       onAuthStateChanged(this.auth, async (user) => {
         if (user) {
           this.userId = user.uid;
