@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "Sudoku",
+    "slug": "sudoku",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#f0f9ff"
+    },
+    "android": {
+      "package": "com.sudoku.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#f0f9ff"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "com.sudoku.app",
+      "supportsTablet": true
+    },
+    "plugins": [
+      "expo-asset"
+    ]
+  }
+}
