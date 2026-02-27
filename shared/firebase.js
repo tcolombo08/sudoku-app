@@ -20,15 +20,27 @@ class FirebaseService {
    * Initialize Firebase
    * Must be called once when the app loads
    */
+  /**
+   * Resolve Firebase module - uses npm package (works in both bundlers and RN)
+   */
+  async _importFirebase(module) {
+    switch (module) {
+      case 'app': return await import('firebase/app');
+      case 'auth': return await import('firebase/auth');
+      case 'firestore': return await import('firebase/firestore');
+      case 'database': return await import('firebase/database');
+    }
+    return null;
+  }
+
   async initialize() {
     try {
-      // Dynamic import for Node.js or browser
-      if (typeof window !== 'undefined') {
-        // Browser
-        const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js');
-        const { getAuth, signInAnonymously, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js');
-        const { getFirestore } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js');
-        const { getDatabase } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js');
+      // Dynamic import for Node.js, browser, or React Native
+      if (typeof window !== 'undefined' || (typeof navigator !== 'undefined' && navigator.product === 'ReactNative')) {
+        const { initializeApp } = await this._importFirebase('app');
+        const { getAuth, signInAnonymously, onAuthStateChanged } = await this._importFirebase('auth');
+        const { getFirestore } = await this._importFirebase('firestore');
+        const { getDatabase } = await this._importFirebase('database');
 
         const app = initializeApp(this.config);
         this.auth = getAuth(app);
@@ -55,6 +67,8 @@ class FirebaseService {
    * Anonymous authentication setup
    */
   async setupAuth() {
+    const { onAuthStateChanged, signInAnonymously } = await this._importFirebase('auth');
+
     return new Promise((resolve) => {
       if (!this.auth) {
         resolve(false);
@@ -62,7 +76,6 @@ class FirebaseService {
       }
 
       // Listen for auth state changes
-      const { onAuthStateChanged, signInAnonymously } = await import('firebase/auth');
       onAuthStateChanged(this.auth, async (user) => {
         if (user) {
           this.userId = user.uid;
@@ -106,7 +119,7 @@ class FirebaseService {
     if (!this.userId) return false;
 
     try {
-      const { setDoc, doc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js');
+      const { setDoc, doc, serverTimestamp } = await this._importFirebase('firestore');
 
       await setDoc(doc(this.db.firestore, 'users', this.userId), {
         profile: {
@@ -143,7 +156,7 @@ class FirebaseService {
     if (!this.userId) return null;
 
     try {
-      const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js');
+      const { doc, getDoc } = await this._importFirebase('firestore');
 
       const docRef = doc(this.db.firestore, 'users', this.userId);
       const docSnap = await getDoc(docRef);
@@ -172,7 +185,7 @@ class FirebaseService {
     }
 
     try {
-      const { doc, updateDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js');
+      const { doc, updateDoc, serverTimestamp } = await this._importFirebase('firestore');
 
       await updateDoc(doc(this.db.firestore, 'users', this.userId), {
         'profile.nickname': newNickname,
@@ -194,7 +207,7 @@ class FirebaseService {
     if (!this.userId) return false;
 
     try {
-      const { ref, set } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js');
+      const { ref, set } = await this._importFirebase('database');
 
       const gameRef = ref(this.db.realtime, `games_progress/${this.userId}/${gameId}`);
       await set(gameRef, {
@@ -222,7 +235,7 @@ class FirebaseService {
     if (!this.userId) return null;
 
     try {
-      const { ref, get } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js');
+      const { ref, get } = await this._importFirebase('database');
 
       const gameRef = ref(this.db.realtime, `games_progress/${this.userId}/${gameId}`);
       const snapshot = await get(gameRef);
@@ -244,7 +257,7 @@ class FirebaseService {
     if (!this.userId) return false;
 
     try {
-      const { collection, addDoc, serverTimestamp, doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js');
+      const { collection, addDoc, serverTimestamp, doc, updateDoc } = await this._importFirebase('firestore');
 
       // Save to games collection
       const gameRef = await addDoc(collection(this.db.firestore, 'games'), {
@@ -283,7 +296,7 @@ class FirebaseService {
     if (!this.userId) return false;
 
     try {
-      const { doc, updateDoc, arrayUnion } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js');
+      const { doc, updateDoc, arrayUnion } = await this._importFirebase('firestore');
 
       const userRef = doc(this.db.firestore, 'users', this.userId);
       const updateData = {
@@ -319,7 +332,7 @@ class FirebaseService {
     if (!this.userId || !this.nickname) return false;
 
     try {
-      const { doc, setDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js');
+      const { doc, setDoc, serverTimestamp } = await this._importFirebase('firestore');
 
       const leaderboardRef = doc(this.db.firestore, `leaderboards/${difficulty}`, this.userId);
       const profile = await this.getUserProfile();
@@ -350,7 +363,7 @@ class FirebaseService {
     if (!this.userId) return null;
 
     try {
-      const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js');
+      const { doc, getDoc } = await this._importFirebase('firestore');
 
       const entryRef = doc(this.db.firestore, `leaderboards/${difficulty}`, this.userId);
       const entrySnap = await getDoc(entryRef);
@@ -369,7 +382,7 @@ class FirebaseService {
    */
   async getLeaderboard(difficulty) {
     try {
-      const { collection, query, orderBy, limit, getDocs, doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js');
+      const { collection, query, orderBy, limit, getDocs, doc, getDoc } = await this._importFirebase('firestore');
 
       // Get top 10
       const q = query(
@@ -441,7 +454,7 @@ class FirebaseService {
     if (!this.userId) return [];
 
     try {
-      const { collection, query, where, orderBy, getDocs } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js');
+      const { collection, query, where, orderBy, getDocs } = await this._importFirebase('firestore');
 
       const q = query(
         collection(this.db.firestore, 'games'),
@@ -475,7 +488,7 @@ class FirebaseService {
     if (!this.userId) return false;
 
     try {
-      const { ref, remove } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js');
+      const { ref, remove } = await this._importFirebase('database');
 
       const gameRef = ref(this.db.realtime, `games_progress/${this.userId}/${gameId}`);
       await remove(gameRef);

@@ -141,12 +141,15 @@ console.log(`Hints used: ${state.stats.hintsUsed}`);
 console.log('\n\nTEST 7: HINTS');
 console.log('-'.repeat(60));
 
-if (emptyCell) {
-  result = game.getHint(emptyCell.r, emptyCell.c);
-  if (result.success) {
-    console.log(`Hint for [${emptyCell.r},${emptyCell.c}]: ${result.hint}`);
-    console.log(`Hints used: ${game.stats.hintsUsed}`);
+// New hint: finds naked single or fills all notes
+result = game.getHint();
+if (result.success) {
+  if (result.type === 'solve') {
+    console.log(`Hint solved [${result.row},${result.col}]: ${result.hint}`);
+  } else {
+    console.log(`Hint filled notes for ${result.cellsFilled} cells`);
   }
+  console.log(`Hints used: ${game.stats.hintsUsed}`);
 }
 
 console.log('\n' + '='.repeat(60));
