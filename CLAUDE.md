@@ -5,8 +5,8 @@ Cross-platform Sudoku app (web + mobile) with Firebase backend.
 
 ## Tech Stack
 - **Core logic**: Pure JavaScript (ES modules, `"type": "module"`)
-- **Web UI** (pending): React 18 + Vite + Tailwind CSS
-- **Mobile** (pending): React Native + Expo
+- **Web UI**: React 19 + Vite + Tailwind CSS v4 + Zustand
+- **Mobile**: React Native 0.76 + Expo SDK 52 + Zustand
 - **Backend**: Firebase 10.7 (Anonymous Auth, Firestore, Realtime DB)
 
 ## Structure
@@ -60,5 +60,5 @@ scripts/setup.js -> Firebase configuration wizard
 ## Current Status
 - Phase 1 (Core Logic): COMPLETE
 - Phase 2 (Firebase): COMPLETE
-- Phase 3 (Web UI): PENDING
-- Phase 4 (Mobile): PENDING
+- Phase 3 (Web UI): COMPLETE
+- Phase 4 (Mobile): COMPLETE
