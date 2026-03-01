@@ -29,6 +29,8 @@ class GameLogic {
     this.elapsedSeconds = 0;
     this.isGameOver = false;
     this.isWon = false;
+    this.isPaused = false;
+    this.pausedAtMs = null;
     this.mode = 'annotation'; // 'annotation' or 'complete'
 
     // Move history (for undo/redo)
@@ -196,9 +198,32 @@ class GameLogic {
   }
 
   /**
+   * PAUSE: freeze the timer
+   */
+  pause() {
+    if (this.isPaused || this.isGameOver) return;
+    this.isPaused = true;
+    this.pausedAtMs = Date.now();
+  }
+
+  /**
+   * RESUME: unfreeze the timer, adjusting startTime for paused duration
+   */
+  resume() {
+    if (!this.isPaused) return;
+    if (this.pausedAtMs) {
+      const pausedDuration = Date.now() - this.pausedAtMs;
+      this.startTime += pausedDuration;
+    }
+    this.isPaused = false;
+    this.pausedAtMs = null;
+  }
+
+  /**
    * TIMER: update elapsed time
    */
   updateTimer() {
+    if (this.isPaused) return this.formatTime(this.elapsedSeconds);
     this.elapsedSeconds = Math.floor((Date.now() - this.startTime) / 1000);
     return this.formatTime(this.elapsedSeconds);
   }

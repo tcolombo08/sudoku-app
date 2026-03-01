@@ -16,7 +16,8 @@ export default function StatsPanel() {
   const elapsedSeconds = useGameStore(s => s.elapsedSeconds);
   const stats = useGameStore(s => s.stats);
   const difficulty = useGameStore(s => s.difficulty);
-  const showAdPrompt = useGameStore(s => s.showAdPrompt);
+  const isPaused = useGameStore(s => s.isPaused);
+  const togglePause = useGameStore(s => s.togglePause);
 
   const difficultyConfig = {
     easy: { label: 'Easy', gradient: 'from-emerald-400 to-teal-500' },
@@ -34,12 +35,30 @@ export default function StatsPanel() {
         {cfg.label}
       </span>
 
-      {/* Timer */}
-      <div className="flex items-center gap-1.5 bg-white rounded-full px-3 py-1.5 shadow-sm border border-gray-100">
-        <div className="w-2 h-2 rounded-full bg-mint animate-pulse" />
-        <span className="font-mono text-sm font-bold text-gray-700 tabular-nums">
-          {formatTime(elapsedSeconds)}
-        </span>
+      {/* Timer + pause button */}
+      <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 bg-white rounded-full px-3 py-1.5 shadow-sm border border-gray-100">
+          <div className="w-2 h-2 rounded-full bg-mint animate-pulse" />
+          <span className="font-mono text-sm font-bold text-gray-700 tabular-nums">
+            {formatTime(elapsedSeconds)}
+          </span>
+        </div>
+        <button
+          onClick={togglePause}
+          className="w-7 h-7 rounded-full flex items-center justify-center shadow-sm border border-gray-100 cursor-pointer hover:scale-110 transition-transform bg-white"
+          title="Pause (P)"
+        >
+          {isPaused ? (
+            <svg className="w-3.5 h-3.5 text-emerald-500" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          ) : (
+            <svg className="w-3.5 h-3.5 text-gray-500" fill="currentColor" viewBox="0 0 24 24">
+              <rect x="6" y="4" width="4" height="16" rx="1" />
+              <rect x="14" y="4" width="4" height="16" rx="1" />
+            </svg>
+          )}
+        </button>
       </div>
 
       {/* Lives */}

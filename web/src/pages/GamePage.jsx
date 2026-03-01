@@ -9,6 +9,7 @@ import ModeToggle from '../components/ModeToggle.jsx';
 import GameOverModal from '../components/GameOverModal.jsx';
 import DifficultySelector from '../components/DifficultySelector.jsx';
 import AdPrompt from '../components/AdPrompt.jsx';
+import PauseModal from '../components/PauseModal.jsx';
 
 export default function GamePage() {
   const { game, gameId, moveCount, isGameOver, isWon, difficulty } = useGame();
@@ -81,11 +82,12 @@ export default function GamePage() {
       <NumberPad />
 
       <GameOverModal />
+      <PauseModal />
       <AdPrompt />
 
       {/* Keyboard shortcuts hint */}
       <div className="mt-5 text-[10px] text-gray-300 text-center font-medium">
-        Arrows: navigate &middot; 1-9: place &middot; Space: notes &middot; H: hint &middot; Ctrl+Z/Y: undo/redo
+        Arrows: navigate &middot; 1-9: place &middot; Space: notes &middot; H: hint &middot; P/Esc: pause &middot; Ctrl+Z/Y: undo/redo
       </div>
     </div>
   );
