@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import useFirebase from '../hooks/useFirebase.js';
+import { AvatarImage } from './AvatarSelector.jsx';
+import { DEFAULT_AVATAR_ID } from '@shared/avatars.js';
 
 function formatTime(seconds) {
   if (!seconds) return '--:--';
@@ -9,7 +11,8 @@ function formatTime(seconds) {
 }
 
 export default function LeaderboardView() {
-  const { getLeaderboard, isInitialized } = useFirebase();
+  const { getLeaderboard, isInitialized, getStorageBucket } = useFirebase();
+  const storageBucket = getStorageBucket();
   const [difficulty, setDifficulty] = useState('medium');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -69,6 +72,12 @@ export default function LeaderboardView() {
               <span className="w-6 text-center font-bold text-gray-400 text-sm">
                 {i + 1}
               </span>
+              <AvatarImage
+                avatarId={entry.avatarId || DEFAULT_AVATAR_ID}
+                label={entry.nickname || 'A'}
+                storageBucket={storageBucket}
+                size={28}
+              />
               <span className="flex-1 font-medium text-gray-900 text-sm truncate">
                 {entry.nickname || 'Anonymous'}
               </span>

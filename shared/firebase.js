@@ -7,6 +7,8 @@
  * await firebaseService.initialize();
  */
 
+import { DEFAULT_AVATAR_ID, AVATARS } from './avatars.js';
+
 class FirebaseService {
   constructor(firebaseConfig) {
     this.config = firebaseConfig;
@@ -14,6 +16,7 @@ class FirebaseService {
     this.auth = null;
     this.userId = null;
     this.nickname = null;
+    this.avatarId = null;
   }
 
   /**
@@ -124,6 +127,7 @@ class FirebaseService {
       await setDoc(doc(this.db.firestore, 'users', this.userId), {
         profile: {
           nickname: nickname,
+          avatarId: DEFAULT_AVATAR_ID,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp()
         },
@@ -142,6 +146,7 @@ class FirebaseService {
       });
 
       this.nickname = nickname;
+      this.avatarId = DEFAULT_AVATAR_ID;
       return true;
     } catch (error) {
       console.error('Error creating profile:', error);
@@ -164,6 +169,7 @@ class FirebaseService {
       if (docSnap.exists()) {
         const data = docSnap.data();
         this.nickname = data.profile.nickname;
+        this.avatarId = data.profile.avatarId || DEFAULT_AVATAR_ID;
         return data;
       }
       return null;
@@ -197,6 +203,32 @@ class FirebaseService {
     } catch (error) {
       console.error('Error updating nickname:', error);
       return { success: false, message: 'Error updating nickname' };
+    }
+  }
+
+  /**
+   * USER: Change avatar
+   */
+  async updateAvatar(avatarId) {
+    if (!this.userId) return { success: false, message: 'Not authenticated' };
+
+    if (!AVATARS.some(a => a.id === avatarId)) {
+      return { success: false, message: 'Invalid avatar' };
+    }
+
+    try {
+      const { doc, updateDoc, serverTimestamp } = await this._importFirebase('firestore');
+
+      await updateDoc(doc(this.db.firestore, 'users', this.userId), {
+        'profile.avatarId': avatarId,
+        'profile.updatedAt': serverTimestamp()
+      });
+
+      this.avatarId = avatarId;
+      return { success: true, message: 'Avatar updated' };
+    } catch (error) {
+      console.error('Error updating avatar:', error);
+      return { success: false, message: 'Error updating avatar' };
     }
   }
 
@@ -342,6 +374,7 @@ class FirebaseService {
       if (!currentEntry || time < currentEntry.bestTime) {
         await setDoc(leaderboardRef, {
           nickname: this.nickname,
+          avatarId: this.avatarId || DEFAULT_AVATAR_ID,
           userId: this.userId,
           bestTime: time,
           gamesWon: (profile.stats.gamesWon || 0) + 1,
@@ -513,7 +546,8 @@ class FirebaseService {
     return {
       isAuthenticated: !!this.userId,
       userId: this.userId,
-      nickname: this.nickname
+      nickname: this.nickname,
+      avatarId: this.avatarId
     };
   }
 
@@ -523,6 +557,7 @@ class FirebaseService {
   initializeMock() {
     this.userId = 'mock_user_' + Math.random().toString(36).substr(2, 9);
     this.nickname = 'Player_MOCK';
+    this.avatarId = DEFAULT_AVATAR_ID;
     console.log('Mock mode - no real Firebase connection');
     return true;
   }

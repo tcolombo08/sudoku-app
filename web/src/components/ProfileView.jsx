@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import useFirebase from '../hooks/useFirebase.js';
+import AvatarSelector, { AvatarImage } from './AvatarSelector.jsx';
+import { DEFAULT_AVATAR_ID } from '@shared/avatars.js';
 
 function formatTime(seconds) {
   if (!seconds) return '--:--';
@@ -9,11 +11,15 @@ function formatTime(seconds) {
 }
 
 export default function ProfileView() {
-  const { profile, isInitialized, updateNickname, getUserGames } = useFirebase();
+  const { profile, isInitialized, updateNickname, updateAvatar, getStorageBucket, getUserGames } = useFirebase();
   const [editing, setEditing] = useState(false);
   const [nickname, setNickname] = useState('');
   const [games, setGames] = useState([]);
   const [saving, setSaving] = useState(false);
+  const [avatarSelectorOpen, setAvatarSelectorOpen] = useState(false);
+
+  const storageBucket = getStorageBucket();
+  const currentAvatarId = profile?.profile?.avatarId || DEFAULT_AVATAR_ID;
 
   useEffect(() => {
     if (profile?.profile?.nickname) {
@@ -37,7 +43,10 @@ export default function ProfileView() {
   if (!isInitialized) {
     return (
       <div className="w-full max-w-md mx-auto">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Profile</h2>
+        <div className="flex flex-col items-center mb-5">
+          <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center text-white text-2xl font-bold mb-3">?</div>
+          <h2 className="text-xl font-bold text-gray-900">Anonymous</h2>
+        </div>
         <p className="text-center text-gray-400 text-sm py-8">
           Firebase not configured. Profile unavailable.
         </p>
@@ -49,53 +58,71 @@ export default function ProfileView() {
 
   return (
     <div className="w-full max-w-md mx-auto">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">Profile</h2>
+      {/* Avatar + Nickname header */}
+      <div className="flex flex-col items-center mb-5">
+        <button
+          onClick={() => setAvatarSelectorOpen(true)}
+          className="relative group cursor-pointer mb-3"
+        >
+          <div className="ring-2 ring-gray-200 group-hover:ring-primary transition-all rounded-full">
+            <AvatarImage
+              avatarId={currentAvatarId}
+              label={profile?.profile?.nickname || 'A'}
+              storageBucket={storageBucket}
+              size={64}
+            />
+          </div>
+          <span className="absolute bottom-0 right-0 w-5 h-5 bg-primary text-white rounded-full flex items-center justify-center text-[10px] shadow">
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+          </span>
+        </button>
 
-      {/* Nickname */}
-      <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4">
-        <div className="flex items-center justify-between">
-          {editing ? (
-            <div className="flex items-center gap-2 flex-1">
-              <input
-                type="text"
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-                maxLength={20}
-                className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-primary"
-                autoFocus
-              />
-              <button
-                onClick={handleSaveNickname}
-                disabled={saving || nickname.length < 2}
-                className="px-3 py-1.5 bg-primary text-white text-sm rounded-lg hover:bg-primary-light disabled:opacity-50 cursor-pointer"
-              >
-                {saving ? '...' : 'Save'}
-              </button>
-              <button
-                onClick={() => setEditing(false)}
-                className="px-3 py-1.5 text-gray-500 text-sm hover:text-gray-700 cursor-pointer"
-              >
-                Cancel
-              </button>
-            </div>
-          ) : (
-            <>
-              <div>
-                <div className="text-sm text-gray-500">Nickname</div>
-                <div className="font-semibold text-gray-900">
-                  {profile?.profile?.nickname || 'Anonymous'}
-                </div>
-              </div>
-              <button
-                onClick={() => setEditing(true)}
-                className="text-sm text-primary hover:text-primary-light cursor-pointer"
-              >
-                Edit
-              </button>
-            </>
-          )}
-        </div>
+        {editing ? (
+          <div className="flex items-center gap-2 w-full max-w-xs">
+            <input
+              type="text"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              maxLength={20}
+              className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-primary"
+              autoFocus
+            />
+            <button
+              onClick={handleSaveNickname}
+              disabled={saving || nickname.length < 2}
+              className="px-3 py-1.5 bg-primary text-white text-sm rounded-lg hover:bg-primary-light disabled:opacity-50 cursor-pointer"
+            >
+              {saving ? '...' : 'Save'}
+            </button>
+            <button
+              onClick={() => setEditing(false)}
+              className="px-3 py-1.5 text-gray-500 text-sm hover:text-gray-700 cursor-pointer"
+            >
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setEditing(true)}
+            className="flex items-center gap-1.5 cursor-pointer group"
+          >
+            <h2 className="text-xl font-bold text-gray-900">
+              {profile?.profile?.nickname || 'Anonymous'}
+            </h2>
+            <svg className="w-4 h-4 text-gray-400 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+          </button>
+        )}
       </div>
+
+      <AvatarSelector
+        isOpen={avatarSelectorOpen}
+        onClose={() => setAvatarSelectorOpen(false)}
+        currentAvatarId={currentAvatarId}
+        onSelect={updateAvatar}
+        storageBucket={storageBucket}
+      />
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 mb-4">

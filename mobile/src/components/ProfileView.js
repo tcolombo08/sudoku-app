@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ScrollView } from 'react-native';
 import useFirebase from '../hooks/useFirebase.js';
 import { colors } from '../theme/colors.js';
+import AvatarSelector from './AvatarSelector.js';
+import { getAvatarUrl, DEFAULT_AVATAR_ID } from '@shared/avatars.js';
 
 function formatTime(seconds) {
   if (!seconds) return '--:--';
@@ -18,11 +20,16 @@ const difficultyBadgeColors = {
 };
 
 export default function ProfileView() {
-  const { profile, isInitialized, updateNickname, getUserGames } = useFirebase();
+  const { profile, isInitialized, updateNickname, updateAvatar, getStorageBucket, getUserGames } = useFirebase();
   const [editing, setEditing] = useState(false);
   const [nickname, setNickname] = useState('');
   const [games, setGames] = useState([]);
   const [saving, setSaving] = useState(false);
+  const [avatarSelectorOpen, setAvatarSelectorOpen] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
+
+  const storageBucket = getStorageBucket();
+  const currentAvatarId = profile?.profile?.avatarId || DEFAULT_AVATAR_ID;
 
   useEffect(() => {
     if (profile?.profile?.nickname) {
@@ -50,7 +57,7 @@ export default function ProfileView() {
           <View style={styles.avatarPlaceholder}>
             <Text style={styles.avatarText}>?</Text>
           </View>
-          <Text style={styles.title}>Profile</Text>
+          <Text style={styles.nicknameValue}>Anonymous</Text>
         </View>
         <Text style={styles.emptyText}>Firebase not configured. Profile unavailable.</Text>
       </View>
@@ -59,7 +66,6 @@ export default function ProfileView() {
 
   const stats = profile?.stats || {};
   const displayNickname = profile?.profile?.nickname || 'Anonymous';
-  const initial = displayNickname.charAt(0).toUpperCase();
   const totalGames = stats.totalGames || 0;
   const gamesWon = stats.gamesWon || 0;
   const winRate = totalGames > 0 ? Math.round((gamesWon / totalGames) * 100) : 0;
@@ -68,9 +74,24 @@ export default function ProfileView() {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {/* Avatar header */}
       <View style={styles.header}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{initial}</Text>
-        </View>
+        <TouchableOpacity onPress={() => setAvatarSelectorOpen(true)} activeOpacity={0.7} style={styles.avatarWrapper}>
+          <View style={styles.avatarContainer}>
+            {!avatarError && storageBucket ? (
+              <Image
+                source={{ uri: getAvatarUrl(currentAvatarId, storageBucket) }}
+                style={styles.avatarImage}
+                onError={() => setAvatarError(true)}
+              />
+            ) : (
+              <Text style={styles.avatarInitial}>
+                {displayNickname.charAt(0).toUpperCase()}
+              </Text>
+            )}
+          </View>
+          <View style={styles.avatarBadge}>
+            <Text style={styles.avatarBadgeText}>✏️</Text>
+          </View>
+        </TouchableOpacity>
 
         {editing ? (
           <View style={styles.editRow}>
@@ -94,12 +115,10 @@ export default function ProfileView() {
             </TouchableOpacity>
           </View>
         ) : (
-          <View style={styles.nicknameRow}>
+          <TouchableOpacity onPress={() => setEditing(true)} style={styles.nicknameRow} activeOpacity={0.7}>
             <Text style={styles.nicknameValue}>{displayNickname}</Text>
-            <TouchableOpacity onPress={() => setEditing(true)}>
-              <Text style={styles.editText}>✏️ Edit</Text>
-            </TouchableOpacity>
-          </View>
+            <Text style={styles.nicknameEditIcon}>✏️</Text>
+          </TouchableOpacity>
         )}
       </View>
 
@@ -161,6 +180,13 @@ export default function ProfileView() {
           ))}
         </View>
       )}
+      <AvatarSelector
+        isOpen={avatarSelectorOpen}
+        onClose={() => setAvatarSelectorOpen(false)}
+        currentAvatarId={currentAvatarId}
+        onSelect={updateAvatar}
+        storageBucket={storageBucket}
+      />
     </ScrollView>
   );
 }
@@ -177,19 +203,52 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
-  avatar: {
+  avatarWrapper: {
+    marginBottom: 12,
+    position: 'relative',
+  },
+  avatarContainer: {
     width: 72,
     height: 72,
     borderRadius: 36,
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
+    overflow: 'hidden',
     shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 6,
+  },
+  avatarImage: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+  },
+  avatarInitial: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: colors.white,
+  },
+  avatarBadge: {
+    position: 'absolute',
+    bottom: 0,
+    right: -2,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 3,
+  },
+  avatarBadgeText: {
+    fontSize: 12,
   },
   avatarPlaceholder: {
     width: 72,
@@ -205,11 +264,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: colors.white,
   },
-  title: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.gray900,
-  },
   nicknameRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -220,8 +274,8 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: colors.gray900,
   },
-  editText: {
-    fontSize: 13,
+  nicknameEditIcon: {
+    fontSize: 16,
     color: colors.primary,
   },
   editRow: {

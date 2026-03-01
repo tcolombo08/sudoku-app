@@ -111,6 +111,24 @@ export default function useFirebase() {
     }
   }, []);
 
+  const updateAvatar = useCallback(async (avatarId) => {
+    if (!firebaseService) return null;
+    try {
+      const result = await firebaseService.updateAvatar(avatarId);
+      if (result.success) {
+        await getUserProfile();
+      }
+      return result;
+    } catch (err) {
+      console.error('Failed to update avatar:', err);
+      return null;
+    }
+  }, [getUserProfile]);
+
+  const getStorageBucket = useCallback(() => {
+    return firebaseService?.config?.storageBucket || null;
+  }, []);
+
   return {
     isInitialized,
     isLoading,
@@ -122,6 +140,8 @@ export default function useFirebase() {
     getLeaderboard,
     getUserProfile,
     updateNickname,
+    updateAvatar,
+    getStorageBucket,
     getUserGames,
   };
 }

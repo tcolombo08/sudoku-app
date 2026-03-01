@@ -1,7 +1,38 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import useFirebase from '../hooks/useFirebase.js';
 import { colors } from '../theme/colors.js';
+import { AVATARS, getAvatarUrl, DEFAULT_AVATAR_ID } from '@shared/avatars.js';
+
+const AVATAR_COLORS = [
+  '#38bdf8', '#34d399', '#a78bfa', '#f472b6',
+  '#fbbf24', '#60a5fa', '#a3e635', '#e879f9',
+  '#fb923c', '#f87171', '#14b8a6', '#6366f1',
+];
+
+function SmallAvatar({ avatarId, nickname, storageBucket }) {
+  const [error, setError] = useState(false);
+  const id = avatarId || DEFAULT_AVATAR_ID;
+  const colorIndex = AVATARS.findIndex(a => a.id === id);
+  const bgColor = AVATAR_COLORS[colorIndex >= 0 ? colorIndex : 0];
+  const initial = (nickname || 'A').charAt(0).toUpperCase();
+
+  if (error || !storageBucket) {
+    return (
+      <View style={[styles.entryAvatar, { backgroundColor: bgColor, alignItems: 'center', justifyContent: 'center' }]}>
+        <Text style={{ fontSize: 12, fontWeight: '700', color: '#fff' }}>{initial}</Text>
+      </View>
+    );
+  }
+
+  return (
+    <Image
+      source={{ uri: getAvatarUrl(id, storageBucket) }}
+      style={styles.entryAvatar}
+      onError={() => setError(true)}
+    />
+  );
+}
 
 function formatTime(seconds) {
   if (!seconds) return '--:--';
@@ -14,7 +45,8 @@ const difficulties = ['easy', 'medium', 'hard', 'expert'];
 const medals = ['🥇', '🥈', '🥉'];
 
 export default function LeaderboardView() {
-  const { getLeaderboard, isInitialized } = useFirebase();
+  const { getLeaderboard, isInitialized, getStorageBucket } = useFirebase();
+  const storageBucket = getStorageBucket();
   const [difficulty, setDifficulty] = useState('medium');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -93,6 +125,11 @@ export default function LeaderboardView() {
                     <Text style={styles.rank}>{i + 1}</Text>
                   )}
                 </View>
+                <SmallAvatar
+                  avatarId={entry.avatarId}
+                  nickname={entry.nickname}
+                  storageBucket={storageBucket}
+                />
                 <Text style={[styles.nickname, isTop1 && styles.nicknameTop1]} numberOfLines={1}>
                   {entry.nickname || 'Anonymous'}
                 </Text>
@@ -223,6 +260,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.gray400,
     textAlign: 'center',
+  },
+  entryAvatar: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
   },
   nickname: {
     flex: 1,
