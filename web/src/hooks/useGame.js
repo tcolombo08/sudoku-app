@@ -6,8 +6,18 @@ export default function useGame() {
 
   // Keyboard input
   const handleKeyDown = useCallback((e) => {
-    const { selectedCell, isGameOver, isWon } = useGameStore.getState();
+    const { selectedCell, isGameOver, isWon, isPaused } = useGameStore.getState();
     if (isGameOver || isWon) return;
+
+    // P or Escape toggles pause
+    if (e.key === 'p' || e.key === 'P' || e.key === 'Escape') {
+      e.preventDefault();
+      useGameStore.getState().togglePause();
+      return;
+    }
+
+    // Block all other shortcuts while paused
+    if (isPaused) return;
 
     // Global shortcuts (no cell selection needed)
 

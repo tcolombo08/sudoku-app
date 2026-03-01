@@ -29,6 +29,8 @@ export default function StatsPanel() {
   const elapsedSeconds = useGameStore(s => s.elapsedSeconds);
   const stats = useGameStore(s => s.stats);
   const difficulty = useGameStore(s => s.difficulty);
+  const isPaused = useGameStore(s => s.isPaused);
+  const togglePause = useGameStore(s => s.togglePause);
 
   const cfg = difficultyConfig[difficulty];
 
@@ -39,10 +41,17 @@ export default function StatsPanel() {
         <Text style={styles.badgeText}>{cfg.label}</Text>
       </View>
 
-      {/* Timer */}
-      <View style={styles.timerContainer}>
-        <View style={styles.timerDot} />
-        <Text style={styles.timerText}>{formatTime(elapsedSeconds)}</Text>
+      {/* Timer + pause button */}
+      <View style={styles.timerRow}>
+        <View style={styles.timerContainer}>
+          <View style={styles.timerDot} />
+          <Text style={styles.timerText}>{formatTime(elapsedSeconds)}</Text>
+        </View>
+        <TouchableOpacity onPress={togglePause} activeOpacity={0.7} style={styles.pauseButton}>
+          <Text style={isPaused ? styles.playIcon : styles.pauseBtnIcon}>
+            {isPaused ? '\u25B6' : '\u275A\u275A'}
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {/* Lives */}
@@ -123,6 +132,36 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     backgroundColor: colors.mint,
+  },
+  timerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  pauseButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.gray100,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+  },
+  pauseBtnIcon: {
+    fontSize: 7,
+    color: colors.gray500,
+    letterSpacing: 1,
+  },
+  playIcon: {
+    fontSize: 12,
+    color: '#10b981',
+    marginLeft: 2,
   },
   timerText: {
     fontFamily: 'monospace',

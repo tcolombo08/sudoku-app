@@ -10,6 +10,7 @@ import ModeToggle from '../components/ModeToggle.js';
 import GameOverModal from '../components/GameOverModal.js';
 import DifficultySelector from '../components/DifficultySelector.js';
 import AdPrompt from '../components/AdPrompt.js';
+import PauseModal from '../components/PauseModal.js';
 import { colors } from '../theme/colors.js';
 
 export default function GameScreen() {
@@ -86,6 +87,7 @@ export default function GameScreen() {
       <NumberPad />
 
       <GameOverModal />
+      <PauseModal />
       <AdPrompt />
     </SafeAreaView>
   );

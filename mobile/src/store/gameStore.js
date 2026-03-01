@@ -32,6 +32,9 @@ const useGameStore = create((set, get) => ({
   freeHintUsed: false,
   showAdPrompt: null, // null | 'hint' | 'life'
 
+  // Pause state
+  isPaused: false,
+
   // Visual feedback state
   errorFlash: false,
   lastPlacedCell: null,
@@ -65,8 +68,8 @@ const useGameStore = create((set, get) => ({
     const gameId = `game_${Date.now()}`;
 
     const interval = setInterval(() => {
-      const { game, isGameOver } = get();
-      if (game && !isGameOver) {
+      const { game, isGameOver, isPaused } = get();
+      if (game && !isGameOver && !isPaused) {
         game.updateTimer();
         set({ elapsedSeconds: game.elapsedSeconds });
       }
@@ -84,11 +87,25 @@ const useGameStore = create((set, get) => ({
       errorFlash: false,
       lastPlacedCell: null,
       shakeBoard: false,
+      isPaused: false,
       freeHintUsed: false,
       showAdPrompt: null,
     });
 
     get().syncState();
+  },
+
+  // Toggle pause
+  togglePause: () => {
+    const { game, isGameOver, isWon, isPaused } = get();
+    if (!game || isGameOver || isWon) return;
+    if (isPaused) {
+      game.resume();
+      set({ isPaused: false });
+    } else {
+      game.pause();
+      set({ isPaused: true });
+    }
   },
 
   // Select a cell
