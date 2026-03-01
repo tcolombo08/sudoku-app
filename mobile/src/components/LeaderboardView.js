@@ -11,6 +11,7 @@ function formatTime(seconds) {
 }
 
 const difficulties = ['easy', 'medium', 'hard', 'expert'];
+const medals = ['🥇', '🥈', '🥉'];
 
 export default function LeaderboardView() {
   const { getLeaderboard, isInitialized } = useFirebase();
@@ -29,7 +30,12 @@ export default function LeaderboardView() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Leaderboard</Text>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerEmoji}>🏆</Text>
+        <Text style={styles.title}>Leaderboard</Text>
+        <Text style={styles.subtitle}>Top players by best time</Text>
+      </View>
 
       {/* Difficulty tabs */}
       <View style={styles.tabBar}>
@@ -54,39 +60,45 @@ export default function LeaderboardView() {
       </View>
 
       {!isInitialized ? (
-        <Text style={styles.emptyText}>
-          Firebase not configured. Leaderboard unavailable.
-        </Text>
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyEmoji}>🔌</Text>
+          <Text style={styles.emptyText}>Firebase not configured</Text>
+          <Text style={styles.emptySubtext}>Leaderboard unavailable</Text>
+        </View>
       ) : loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="small" color={colors.primary} />
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={styles.loadingText}>Loading rankings...</Text>
         </View>
       ) : data?.top10?.length > 0 ? (
         <View style={styles.list}>
           {data.top10.map((entry, i) => {
-            const bgColors = [
-              '#fffbeb', // gold
-              colors.gray50,
-              '#fff7ed', // orange tint
-            ];
-            const borderColors = ['#fde68a', colors.gray200, '#fed7aa'];
+            const isTop1 = i === 0;
+            const isTop3 = i < 3;
 
             return (
               <View
                 key={i}
                 style={[
                   styles.entry,
-                  {
-                    backgroundColor: i < 3 ? bgColors[i] : colors.white,
-                    borderColor: i < 3 ? borderColors[i] : colors.gray100,
-                  },
+                  isTop1 && styles.entryTop1,
+                  isTop3 && !isTop1 && styles.entryTop3,
+                  !isTop3 && styles.entryDefault,
                 ]}
               >
-                <Text style={styles.rank}>{i + 1}</Text>
-                <Text style={styles.nickname} numberOfLines={1}>
+                <View style={styles.rankContainer}>
+                  {isTop3 ? (
+                    <Text style={styles.medal}>{medals[i]}</Text>
+                  ) : (
+                    <Text style={styles.rank}>{i + 1}</Text>
+                  )}
+                </View>
+                <Text style={[styles.nickname, isTop1 && styles.nicknameTop1]} numberOfLines={1}>
                   {entry.nickname || 'Anonymous'}
                 </Text>
-                <Text style={styles.time}>{formatTime(entry.time)}</Text>
+                <Text style={[styles.time, isTop1 && styles.timeTop1]}>
+                  {formatTime(entry.time)}
+                </Text>
               </View>
             );
           })}
@@ -94,7 +106,9 @@ export default function LeaderboardView() {
           {data.userRank && data.userRank > 10 && (
             <View style={styles.userRankSection}>
               <View style={styles.userRankEntry}>
-                <Text style={[styles.rank, { color: colors.primary }]}>{data.userRank}</Text>
+                <View style={styles.rankContainer}>
+                  <Text style={[styles.rank, { color: colors.primary }]}>{data.userRank}</Text>
+                </View>
                 <Text style={styles.nickname}>You</Text>
                 <Text style={styles.time}>{formatTime(data.userEntry?.time)}</Text>
               </View>
@@ -102,7 +116,11 @@ export default function LeaderboardView() {
           )}
         </View>
       ) : (
-        <Text style={styles.emptyText}>No entries yet. Be the first!</Text>
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyEmoji}>🎯</Text>
+          <Text style={styles.emptyText}>No entries yet</Text>
+          <Text style={styles.emptySubtext}>Be the first to complete a game!</Text>
+        </View>
       )}
     </View>
   );
@@ -113,11 +131,23 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 16,
   },
+  header: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  headerEmoji: {
+    fontSize: 40,
+    marginBottom: 4,
+  },
   title: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '700',
     color: colors.gray900,
-    marginBottom: 16,
+  },
+  subtitle: {
+    fontSize: 13,
+    color: colors.gray400,
+    marginTop: 2,
   },
   tabBar: {
     flexDirection: 'row',
@@ -147,8 +177,13 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   loadingContainer: {
-    paddingVertical: 32,
+    paddingVertical: 48,
     alignItems: 'center',
+    gap: 12,
+  },
+  loadingText: {
+    fontSize: 13,
+    color: colors.gray400,
   },
   list: {
     gap: 8,
@@ -162,12 +197,32 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     gap: 12,
   },
+  entryTop1: {
+    backgroundColor: '#fffbeb',
+    borderColor: '#fbbf24',
+    borderWidth: 1.5,
+    paddingVertical: 14,
+  },
+  entryTop3: {
+    backgroundColor: colors.gray50,
+    borderColor: colors.gray200,
+  },
+  entryDefault: {
+    backgroundColor: colors.white,
+    borderColor: colors.gray100,
+  },
+  rankContainer: {
+    width: 28,
+    alignItems: 'center',
+  },
+  medal: {
+    fontSize: 18,
+  },
   rank: {
-    width: 24,
-    textAlign: 'center',
     fontWeight: '700',
     fontSize: 14,
     color: colors.gray400,
+    textAlign: 'center',
   },
   nickname: {
     flex: 1,
@@ -175,10 +230,17 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: colors.gray900,
   },
+  nicknameTop1: {
+    fontWeight: '700',
+  },
   time: {
     fontFamily: 'monospace',
     fontSize: 14,
     color: colors.gray600,
+  },
+  timeTop1: {
+    fontWeight: '700',
+    color: colors.gray900,
   },
   userRankSection: {
     marginTop: 12,
@@ -198,10 +260,22 @@ const styles = StyleSheet.create({
     borderColor: '#bae6fd',
     gap: 12,
   },
+  emptyContainer: {
+    alignItems: 'center',
+    paddingVertical: 48,
+  },
+  emptyEmoji: {
+    fontSize: 40,
+    marginBottom: 12,
+  },
   emptyText: {
-    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.gray500,
+  },
+  emptySubtext: {
+    fontSize: 13,
     color: colors.gray400,
-    fontSize: 14,
-    paddingVertical: 32,
+    marginTop: 4,
   },
 });

@@ -26,10 +26,13 @@ function TabIcon({ label, focused }) {
       ]}>
         {icons[label]}
       </Text>
-      <Text style={[
-        styles.tabLabel,
-        { color: focused ? colors.primary : colors.gray400, fontWeight: focused ? '600' : '400' },
-      ]}>
+      <Text
+        numberOfLines={1}
+        style={[
+          styles.tabLabel,
+          { color: focused ? colors.primary : colors.gray400, fontWeight: focused ? '600' : '400' },
+        ]}
+      >
         {label}
       </Text>
     </View>
@@ -46,6 +49,7 @@ export default function App() {
             headerShown: false,
             tabBarStyle: styles.tabBar,
             tabBarShowLabel: false,
+            tabBarIconStyle: { width: '100%' },
           }}
         >
           <Tab.Screen
