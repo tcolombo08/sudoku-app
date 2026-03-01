@@ -17,6 +17,11 @@ class FirebaseService {
     this.userId = null;
     this.nickname = null;
     this.avatarId = null;
+    this.isAnonymous = false;
+    this._authReadyResolve = null;
+    this._authReady = new Promise((resolve) => {
+      this._authReadyResolve = resolve;
+    });
   }
 
   /**
@@ -67,37 +72,138 @@ class FirebaseService {
   }
 
   /**
-   * Anonymous authentication setup
+   * Auth setup - listens for existing session, does NOT auto-login
    */
   async setupAuth() {
-    const { onAuthStateChanged, signInAnonymously } = await this._importFirebase('auth');
+    const { onAuthStateChanged } = await this._importFirebase('auth');
+    this._onAuthStateChanged = onAuthStateChanged;
 
     return new Promise((resolve) => {
       if (!this.auth) {
+        this._authReadyResolve(false);
         resolve(false);
         return;
       }
 
-      // Listen for auth state changes
-      onAuthStateChanged(this.auth, async (user) => {
-        if (user) {
-          this.userId = user.uid;
-          await this.ensureUserProfile();
-          resolve(true);
-        } else {
-          // Start anonymous session
-          try {
-            const result = await signInAnonymously(this.auth);
-            this.userId = result.user.uid;
-            await this.ensureUserProfile();
+      // Only use the first callback to check for existing session
+      let initialCheck = true;
+      this._unsubscribeAuth = onAuthStateChanged(this.auth, async (user) => {
+        if (initialCheck) {
+          initialCheck = false;
+          if (user) {
+            this.userId = user.uid;
+            this.isAnonymous = user.isAnonymous;
+            if (!this.isAnonymous) {
+              await this.ensureUserProfile();
+            } else {
+              this.nickname = 'Guest';
+            }
+            this._authReadyResolve(true);
             resolve(true);
-          } catch (error) {
-            console.error('Auth error:', error);
+          } else {
+            this._authReadyResolve(false);
             resolve(false);
           }
         }
+        // Subsequent auth state changes are handled by the sign-in methods directly
       });
     });
+  }
+
+  /**
+   * AUTH: Sign in anonymously (guest mode)
+   */
+  async signInAsAnonymous() {
+    try {
+      const { signInAnonymously } = await this._importFirebase('auth');
+      const result = await signInAnonymously(this.auth);
+      this.userId = result.user.uid;
+      this.isAnonymous = true;
+      this.nickname = 'Guest';
+      return { success: true };
+    } catch (error) {
+      console.error('Anonymous sign-in error:', error);
+      return { success: false, message: error.message };
+    }
+  }
+
+  /**
+   * AUTH: Sign up with email/password
+   */
+  async signUpWithEmail(email, password, nickname) {
+    try {
+      const { createUserWithEmailAndPassword } = await this._importFirebase('auth');
+      const result = await createUserWithEmailAndPassword(this.auth, email, password);
+      this.userId = result.user.uid;
+      this.isAnonymous = false;
+      await this.createUserProfile(nickname);
+      return { success: true };
+    } catch (error) {
+      console.error('Sign up error:', error);
+      return { success: false, message: error.message };
+    }
+  }
+
+  /**
+   * AUTH: Sign in with email/password
+   */
+  async signInWithEmail(email, password) {
+    try {
+      const { signInWithEmailAndPassword } = await this._importFirebase('auth');
+      const result = await signInWithEmailAndPassword(this.auth, email, password);
+      this.userId = result.user.uid;
+      this.isAnonymous = false;
+      await this.ensureUserProfile();
+      return { success: true };
+    } catch (error) {
+      console.error('Sign in error:', error);
+      return { success: false, message: error.message };
+    }
+  }
+
+  /**
+   * AUTH: Sign in with Google (web - popup)
+   */
+  async signInWithGoogle() {
+    try {
+      const { GoogleAuthProvider, signInWithPopup } = await this._importFirebase('auth');
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(this.auth, provider);
+      this.userId = result.user.uid;
+      this.isAnonymous = false;
+      // Use Google display name as nickname if no profile exists
+      const existingProfile = await this.getUserProfile();
+      if (!existingProfile) {
+        const nickname = result.user.displayName || `Player_${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+        await this.createUserProfile(nickname);
+      }
+      return { success: true };
+    } catch (error) {
+      // User closed popup
+      if (error.code === 'auth/popup-closed-by-user') {
+        return { success: false, message: 'Sign-in cancelled' };
+      }
+      console.error('Google sign-in error:', error);
+      return { success: false, message: error.message };
+    }
+  }
+
+  /**
+   * AUTH: Sign out
+   */
+  async signOut() {
+    try {
+      const { signOut } = await this._importFirebase('auth');
+      await signOut(this.auth);
+      this.userId = null;
+      this.isAnonymous = false;
+      this.nickname = null;
+      this.avatarId = null;
+      return { success: true };
+    } catch (error) {
+      console.error('Sign out error:', error);
+      return { success: false, message: error.message };
+    }
   }
 
   /**
@@ -545,6 +651,7 @@ class FirebaseService {
   getAuthState() {
     return {
       isAuthenticated: !!this.userId,
+      isAnonymous: this.isAnonymous,
       userId: this.userId,
       nickname: this.nickname,
       avatarId: this.avatarId

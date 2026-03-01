@@ -7,6 +7,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import GameScreen from './src/screens/GameScreen.js';
 import LeaderboardScreen from './src/screens/LeaderboardScreen.js';
 import ProfileScreen from './src/screens/ProfileScreen.js';
+import AuthScreen from './src/screens/AuthScreen.js';
+import useFirebase from './src/hooks/useFirebase.js';
 import { colors } from './src/theme/colors.js';
 
 const Tab = createBottomTabNavigator();
@@ -39,47 +41,77 @@ function TabIcon({ label, focused }) {
   );
 }
 
+function MainApp() {
+  return (
+    <NavigationContainer>
+      <StatusBar style="dark" />
+      <Tab.Navigator
+        screenOptions={{
+          headerShown: false,
+          tabBarStyle: styles.tabBar,
+          tabBarShowLabel: false,
+          tabBarIconStyle: { width: '100%' },
+        }}
+      >
+        <Tab.Screen
+          name="Play"
+          component={GameScreen}
+          options={{
+            tabBarIcon: ({ focused }) => <TabIcon label="Play" focused={focused} />,
+          }}
+        />
+        <Tab.Screen
+          name="Rankings"
+          component={LeaderboardScreen}
+          options={{
+            tabBarIcon: ({ focused }) => <TabIcon label="Rankings" focused={focused} />,
+          }}
+        />
+        <Tab.Screen
+          name="Profile"
+          component={ProfileScreen}
+          options={{
+            tabBarIcon: ({ focused }) => <TabIcon label="Profile" focused={focused} />,
+          }}
+        />
+      </Tab.Navigator>
+    </NavigationContainer>
+  );
+}
+
 export default function App() {
+  const { authState, isLoading, firebaseAvailable } = useFirebase();
+
   return (
     <SafeAreaProvider>
-      <NavigationContainer>
-        <StatusBar style="dark" />
-        <Tab.Navigator
-          screenOptions={{
-            headerShown: false,
-            tabBarStyle: styles.tabBar,
-            tabBarShowLabel: false,
-            tabBarIconStyle: { width: '100%' },
-          }}
-        >
-          <Tab.Screen
-            name="Play"
-            component={GameScreen}
-            options={{
-              tabBarIcon: ({ focused }) => <TabIcon label="Play" focused={focused} />,
-            }}
-          />
-          <Tab.Screen
-            name="Rankings"
-            component={LeaderboardScreen}
-            options={{
-              tabBarIcon: ({ focused }) => <TabIcon label="Rankings" focused={focused} />,
-            }}
-          />
-          <Tab.Screen
-            name="Profile"
-            component={ProfileScreen}
-            options={{
-              tabBarIcon: ({ focused }) => <TabIcon label="Profile" focused={focused} />,
-            }}
-          />
-        </Tab.Navigator>
-      </NavigationContainer>
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <StatusBar style="dark" />
+          <Text style={styles.loadingText}>Loading...</Text>
+        </View>
+      ) : !firebaseAvailable || authState?.isAuthenticated ? (
+        <MainApp />
+      ) : (
+        <>
+          <StatusBar style="dark" />
+          <AuthScreen />
+        </>
+      )}
     </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.gray50,
+  },
+  loadingText: {
+    color: colors.gray400,
+    fontSize: 14,
+  },
   tabBar: {
     backgroundColor: colors.white,
     borderTopWidth: 1,

@@ -10,8 +10,41 @@ function formatTime(seconds) {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
+function GuestProfileView() {
+  const { signOut } = useFirebase();
+  const [signingOut, setSigningOut] = useState(false);
+
+  const handleSignOut = async () => {
+    setSigningOut(true);
+    await signOut();
+  };
+
+  return (
+    <div className="w-full max-w-md mx-auto">
+      <div className="flex flex-col items-center mb-5">
+        <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center text-white text-2xl font-bold mb-3">
+          G
+        </div>
+        <h2 className="text-xl font-bold text-gray-900">Guest</h2>
+        <p className="text-sm text-gray-500 mt-1">Stats are not saved in guest mode</p>
+      </div>
+
+      <div className="space-y-3 mt-6">
+        <p className="text-center text-sm text-gray-500">Create an account to save your progress and compete on leaderboards.</p>
+        <button
+          onClick={handleSignOut}
+          disabled={signingOut}
+          className="w-full py-3 px-4 bg-primary text-white font-semibold rounded-xl hover:bg-primary-light transition-colors cursor-pointer disabled:opacity-50"
+        >
+          Sign Up / Login
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function ProfileView() {
-  const { profile, isInitialized, updateNickname, updateAvatar, getStorageBucket, getUserGames } = useFirebase();
+  const { profile, isInitialized, isAnonymous, firebaseAvailable, updateNickname, updateAvatar, getStorageBucket, getUserGames, signOut } = useFirebase();
   const [editing, setEditing] = useState(false);
   const [nickname, setNickname] = useState('');
   const [games, setGames] = useState([]);
@@ -28,10 +61,14 @@ export default function ProfileView() {
   }, [profile]);
 
   useEffect(() => {
-    if (isInitialized) {
+    if (isInitialized && !isAnonymous) {
       getUserGames(10).then(setGames);
     }
-  }, [isInitialized, getUserGames]);
+  }, [isInitialized, isAnonymous, getUserGames]);
+
+  if (!firebaseAvailable || !isInitialized || isAnonymous) {
+    return <GuestProfileView />;
+  }
 
   const handleSaveNickname = async () => {
     setSaving(true);
@@ -40,19 +77,9 @@ export default function ProfileView() {
     setEditing(false);
   };
 
-  if (!isInitialized) {
-    return (
-      <div className="w-full max-w-md mx-auto">
-        <div className="flex flex-col items-center mb-5">
-          <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center text-white text-2xl font-bold mb-3">?</div>
-          <h2 className="text-xl font-bold text-gray-900">Anonymous</h2>
-        </div>
-        <p className="text-center text-gray-400 text-sm py-8">
-          Firebase not configured. Profile unavailable.
-        </p>
-      </div>
-    );
-  }
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   const stats = profile?.stats || {};
 
@@ -155,7 +182,7 @@ export default function ProfileView() {
 
       {/* Game history */}
       {games.length > 0 && (
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4">
           <h3 className="text-sm font-semibold text-gray-700 mb-3">Recent Games</h3>
           <div className="space-y-2">
             {games.map((g, i) => (
@@ -170,6 +197,14 @@ export default function ProfileView() {
           </div>
         </div>
       )}
+
+      {/* Sign out */}
+      <button
+        onClick={handleSignOut}
+        className="w-full py-2.5 text-gray-500 text-sm hover:text-danger transition-colors cursor-pointer"
+      >
+        Sign Out
+      </button>
     </div>
   );
 }
