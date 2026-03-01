@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-do
 import GamePage from './pages/GamePage.jsx';
 import LeaderboardPage from './pages/LeaderboardPage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
+import AuthPage from './pages/AuthPage.jsx';
+import useFirebase from './hooks/useFirebase.js';
 
 function NavBar() {
   const location = useLocation();
@@ -48,7 +50,7 @@ function BottomNav() {
   );
 }
 
-export default function App() {
+function AuthenticatedApp() {
   return (
     <BrowserRouter>
       <div className="pb-16">
@@ -62,4 +64,27 @@ export default function App() {
       </div>
     </BrowserRouter>
   );
+}
+
+export default function App() {
+  const { authState, isLoading, firebaseAvailable } = useFirebase();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-gray-400 text-sm">Loading...</div>
+      </div>
+    );
+  }
+
+  // No Firebase → skip auth, go straight to game as guest
+  if (!firebaseAvailable) {
+    return <AuthenticatedApp />;
+  }
+
+  if (!authState?.isAuthenticated) {
+    return <AuthPage />;
+  }
+
+  return <AuthenticatedApp />;
 }

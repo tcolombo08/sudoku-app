@@ -19,8 +19,46 @@ const difficultyBadgeColors = {
   expert: { bg: '#f3e8ff', text: '#6b21a8' },
 };
 
+function GuestProfileView() {
+  const { signOut } = useFirebase();
+  const [signingOut, setSigningOut] = useState(false);
+
+  const handleSignOut = async () => {
+    setSigningOut(true);
+    await signOut();
+  };
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <View style={styles.avatarPlaceholder}>
+            <Text style={styles.avatarText}>G</Text>
+          </View>
+          <Text style={styles.nicknameValue}>Guest</Text>
+          <Text style={styles.guestSubtitle}>Stats are not saved in guest mode</Text>
+        </View>
+
+        <View style={styles.guestCard}>
+          <Text style={styles.guestCardText}>
+            Create an account to save your progress and compete on leaderboards.
+          </Text>
+          <TouchableOpacity
+            style={[styles.signUpButton, signingOut && { opacity: 0.5 }]}
+            onPress={handleSignOut}
+            disabled={signingOut}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.signUpButtonText}>Sign Up / Login</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  );
+}
+
 export default function ProfileView() {
-  const { profile, isInitialized, updateNickname, updateAvatar, getStorageBucket, getUserGames } = useFirebase();
+  const { profile, isInitialized, isAnonymous, firebaseAvailable, updateNickname, updateAvatar, getStorageBucket, getUserGames, signOut } = useFirebase();
   const [editing, setEditing] = useState(false);
   const [nickname, setNickname] = useState('');
   const [games, setGames] = useState([]);
@@ -38,10 +76,14 @@ export default function ProfileView() {
   }, [profile]);
 
   useEffect(() => {
-    if (isInitialized) {
+    if (isInitialized && !isAnonymous) {
       getUserGames(10).then(setGames);
     }
-  }, [isInitialized, getUserGames]);
+  }, [isInitialized, isAnonymous, getUserGames]);
+
+  if (!firebaseAvailable || !isInitialized || isAnonymous) {
+    return <GuestProfileView />;
+  }
 
   const handleSaveNickname = async () => {
     setSaving(true);
@@ -50,19 +92,9 @@ export default function ProfileView() {
     setEditing(false);
   };
 
-  if (!isInitialized) {
-    return (
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <View style={styles.avatarPlaceholder}>
-            <Text style={styles.avatarText}>?</Text>
-          </View>
-          <Text style={styles.nicknameValue}>Anonymous</Text>
-        </View>
-        <Text style={styles.emptyText}>Firebase not configured. Profile unavailable.</Text>
-      </View>
-    );
-  }
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   const stats = profile?.stats || {};
   const displayNickname = profile?.profile?.nickname || 'Anonymous';
@@ -180,6 +212,12 @@ export default function ProfileView() {
           ))}
         </View>
       )}
+
+      {/* Sign out */}
+      <TouchableOpacity onPress={handleSignOut} style={styles.signOutButton} activeOpacity={0.7}>
+        <Text style={styles.signOutText}>Sign Out</Text>
+      </TouchableOpacity>
+
       <AvatarSelector
         isOpen={avatarSelectorOpen}
         onClose={() => setAvatarSelectorOpen(false)}
@@ -263,6 +301,38 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700',
     color: colors.white,
+  },
+  guestSubtitle: {
+    fontSize: 13,
+    color: colors.gray500,
+    marginTop: 4,
+  },
+  guestCard: {
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.gray200,
+    padding: 20,
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  guestCardText: {
+    fontSize: 14,
+    color: colors.gray500,
+    textAlign: 'center',
+    marginBottom: 16,
+    lineHeight: 20,
+  },
+  signUpButton: {
+    backgroundColor: colors.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 10,
+  },
+  signUpButtonText: {
+    color: colors.white,
+    fontSize: 15,
+    fontWeight: '600',
   },
   nicknameRow: {
     flexDirection: 'row',
@@ -402,6 +472,15 @@ const styles = StyleSheet.create({
   gameTime: {
     fontFamily: 'monospace',
     fontSize: 12,
+    color: colors.gray500,
+  },
+  signOutButton: {
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  signOutText: {
+    fontSize: 14,
     color: colors.gray500,
   },
   emptyText: {

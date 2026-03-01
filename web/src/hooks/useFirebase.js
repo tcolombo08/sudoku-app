@@ -1,26 +1,33 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
+// Module-level shared state
 let firebaseService = null;
+let firebaseAvailable = false;
+let sharedAuthState = null;
+let sharedProfile = null;
+let sharedIsLoading = true;
+let initPromise = null;
+const listeners = new Set();
 
-export default function useFirebase() {
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [authState, setAuthState] = useState(null);
-  const [profile, setProfile] = useState(null);
-  const [error, setError] = useState(null);
-  const initAttempted = useRef(false);
+function notifyListeners() {
+  listeners.forEach(fn => fn());
+}
 
-  // Initialize Firebase lazily
-  const initialize = useCallback(async () => {
-    if (firebaseService || initAttempted.current) return firebaseService;
-    initAttempted.current = true;
+function setSharedAuth(state, profile = undefined) {
+  sharedAuthState = state;
+  if (profile !== undefined) sharedProfile = profile;
+  notifyListeners();
+}
 
+// Single initialization - returns a promise all callers can await
+function doInitialize() {
+  if (initPromise) return initPromise;
+
+  initPromise = (async () => {
     try {
-      setIsLoading(true);
-      // Dynamic imports to avoid breaking if firebase.config.js doesn't exist
       const { firebaseConfig } = await import('../../firebase.config.js');
       if (!firebaseConfig) {
-        console.warn('Firebase not configured. Firebase features disabled.');
+        console.warn('Firebase not configured.');
         return null;
       }
 
@@ -28,27 +35,126 @@ export default function useFirebase() {
 
       firebaseService = new FirebaseService(firebaseConfig);
       await firebaseService.initialize();
-      setIsInitialized(true);
-      setAuthState(firebaseService.getAuthState());
+      firebaseAvailable = true;
 
-      const userProfile = await firebaseService.getUserProfile();
-      setProfile(userProfile);
+      // If user already had a session
+      if (firebaseService.userId) {
+        sharedAuthState = firebaseService.getAuthState();
+        if (!firebaseService.isAnonymous) {
+          sharedProfile = await firebaseService.getUserProfile();
+        }
+      }
+
+      return firebaseService;
     } catch (err) {
       console.warn('Firebase initialization skipped:', err.message);
-      setError(err.message);
+      firebaseAvailable = false;
+      return null;
     } finally {
-      setIsLoading(false);
+      sharedIsLoading = false;
+      notifyListeners();
     }
+  })();
 
-    return firebaseService;
+  return initPromise;
+}
+
+// All auth functions call this to ensure service is ready
+async function getService() {
+  if (firebaseService) return firebaseService;
+  return await doInitialize();
+}
+
+export default function useFirebase() {
+  const [, forceUpdate] = useState(0);
+
+  // Subscribe to shared state changes
+  useEffect(() => {
+    const listener = () => forceUpdate(n => n + 1);
+    listeners.add(listener);
+    return () => listeners.delete(listener);
   }, []);
 
+  // Kick off initialization on first mount
   useEffect(() => {
-    initialize();
-  }, [initialize]);
+    doInitialize();
+  }, []);
+
+  const signUp = useCallback(async (email, password, nickname) => {
+    const svc = await getService();
+    if (!svc) return { success: false, message: 'Firebase not configured' };
+    try {
+      const result = await svc.signUpWithEmail(email, password, nickname);
+      if (result.success) {
+        const prof = await svc.getUserProfile();
+        setSharedAuth(svc.getAuthState(), prof);
+      }
+      return result;
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  }, []);
+
+  const signIn = useCallback(async (email, password) => {
+    const svc = await getService();
+    if (!svc) return { success: false, message: 'Firebase not configured' };
+    try {
+      const result = await svc.signInWithEmail(email, password);
+      if (result.success) {
+        const prof = await svc.getUserProfile();
+        setSharedAuth(svc.getAuthState(), prof);
+      }
+      return result;
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  }, []);
+
+  const signInAnonymous = useCallback(async () => {
+    const svc = await getService();
+    if (!svc) return { success: false, message: 'Firebase not configured' };
+    try {
+      const result = await svc.signInAsAnonymous();
+      if (result.success) {
+        setSharedAuth(svc.getAuthState(), null);
+      }
+      return result;
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  }, []);
+
+  const signInWithGoogle = useCallback(async () => {
+    const svc = await getService();
+    if (!svc) return { success: false, message: 'Firebase not configured' };
+    try {
+      const result = await svc.signInWithGoogle();
+      if (result.success) {
+        const prof = await svc.getUserProfile();
+        setSharedAuth(svc.getAuthState(), prof);
+      }
+      return result;
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  }, []);
+
+  const signOutUser = useCallback(async () => {
+    const svc = await getService();
+    if (!svc) return { success: false };
+    try {
+      const result = await svc.signOut();
+      if (result.success) {
+        setSharedAuth(null, null);
+      }
+      return result;
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  }, []);
 
   const saveGameState = useCallback(async (gameId, gameState) => {
-    if (!firebaseService) return false;
+    if (!firebaseService || firebaseService.isAnonymous) return false;
     try {
       return await firebaseService.saveGameState(gameId, gameState);
     } catch (err) {
@@ -58,7 +164,7 @@ export default function useFirebase() {
   }, []);
 
   const saveGameResult = useCallback(async (result) => {
-    if (!firebaseService) return null;
+    if (!firebaseService || firebaseService.isAnonymous) return null;
     try {
       return await firebaseService.saveGameResult(result);
     } catch (err) {
@@ -81,7 +187,7 @@ export default function useFirebase() {
     if (!firebaseService) return null;
     try {
       const p = await firebaseService.getUserProfile();
-      setProfile(p);
+      setSharedAuth(sharedAuthState, p);
       return p;
     } catch (err) {
       console.error('Failed to get profile:', err);
@@ -132,11 +238,17 @@ export default function useFirebase() {
   }, []);
 
   return {
-    isInitialized,
-    isLoading,
-    authState,
-    profile,
-    error,
+    isInitialized: !!firebaseService,
+    isLoading: sharedIsLoading,
+    firebaseAvailable,
+    authState: sharedAuthState,
+    isAnonymous: sharedAuthState?.isAnonymous || false,
+    profile: sharedProfile,
+    signUp,
+    signIn,
+    signInAnonymous,
+    signInWithGoogle,
+    signOut: signOutUser,
     saveGameState,
     saveGameResult,
     getLeaderboard,
